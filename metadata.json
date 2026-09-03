@@ -1,0 +1,6 @@
+{
+  "name": "میلانو لگال",
+  "description": "سامانه هوشمند مدیریت پرونده‌های حقوقی، مواعد قضایی، ابلاغیه‌های ثنا و تنظیم لوایح حقوقی میلانو با اتصال پایگاه داده meelanoe_legal",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
