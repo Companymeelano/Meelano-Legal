@@ -59,22 +59,25 @@ jobs:
           echo "SHA=${{ github.sha }}" >> ci-error.log
           echo "" >> ci-error.log
           echo "=== ERRORS ===" >> ci-error.log
-          grep -i -E "e: |error:|FAILURE|Unresolved|does not exist|not found|Execution failed" build.log | head -n 400 >> ci-error.log || true
+          grep -i -E "e: |error:|FAILURE|Unresolved|does not exist|not found|Execution failed|FAILED" build.log | head -n 500 >> ci-error.log || true
           echo "" >> ci-error.log
-          echo "=== LAST 600 LINES ===" >> ci-error.log
-          tail -n 600 build.log >> ci-error.log
+          echo "=== LAST 800 LINES ===" >> ci-error.log
+          tail -n 800 build.log >> ci-error.log
+          
+          # Truncated for issue (max 50k)
+          head -c 50000 ci-error.log > ci-error-issue.log
           
           if [ $EXIT_CODE -ne 0 ]; then
             echo "## ❌ Build Failed - Error Analysis" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "### Compilation errors:" >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
-            grep -i -E "e: |error:|FAILURE|Unresolved|does not exist|not found" build.log | head -n 200 >> $GITHUB_STEP_SUMMARY || echo "No pattern" >> $GITHUB_STEP_SUMMARY
+            grep -i -E "e: |error:|FAILURE|Unresolved|does not exist|not found" build.log | head -n 250 >> $GITHUB_STEP_SUMMARY || echo "No pattern" >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
-            echo "### Last 300 lines:" >> $GITHUB_STEP_SUMMARY
+            echo "### Last 400 lines:" >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
-            tail -n 300 build.log >> $GITHUB_STEP_SUMMARY
+            tail -n 400 build.log >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
           else
             echo "## ✅ Build Succeeded" >> $GITHUB_STEP_SUMMARY
@@ -88,8 +91,8 @@ jobs:
         run: |
           find . -name "*.apk" -type f 2>/dev/null | head -n 20
           ls -lh app/build/outputs/apk/debug/ 2>/dev/null || true
-          echo "--- ci-error.log head 400 ---"
-          head -n 400 ci-error.log || true
+          echo "--- ci-error.log head 500 ---"
+          head -n 500 ci-error.log || true
 
       - name: Upload APK
         if: always()
@@ -114,24 +117,24 @@ jobs:
             app/build/reports/
           if-no-files-found: warn
 
-      - name: Create Gist with error log on failure
+      - name: Create Issue and upload log via contents API on failure
         if: failure()
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "Creating gist with error log..."
-          # Truncate to 1MB max for gist (gist limit is smaller but we try)
-          head -c 900000 ci-error.log > ci-error-gist.log || true
+          echo "Creating issue with truncated log..."
+          cat ci-error-issue.log
           
-          # Use gh api to create gist
-          gh api gists --method POST \
-            -f description="Build error log run ${{ github.run_id }} sha ${{ github.sha }}" \
-            -f public=false \
-            -f files["ci-error-${{ github.run_id }}.log"].content="$(cat ci-error-gist.log | head -c 800000)" \
-            || echo "Gist creation failed"
+          # Create issue
+          gh issue create --title "Build failed ${{ github.run_id }} - ${{ github.sha }}" --body-file ci-error-issue.log || echo "Issue create failed"
           
-          # Also create issue without label
-          gh issue create --title "Build failed ${{ github.run_id }}" --body-file ci-error-gist.log || echo "Issue creation failed, trying without body file"
-          
-          # Try simple issue
-          gh issue create --title "Build failed ${{ github.run_id }} - log in gist" --body "Run ${{ github.run_id }} failed, see gist and artifacts. SHA ${{ github.sha }}. Check Actions summary for errors." || echo "Simple issue failed"
+          # Upload via contents API to ci-logs folder
+          mkdir -p ci-logs || true
+          CONTENT=$(base64 -w 0 ci-error.log)
+          # Try to get existing file sha
+          SHA=$(gh api repos/${{ github.repository }}/contents/ci-logs/run-${{ github.run_id }}.log --jq '.sha' 2>/dev/null || echo "")
+          if [ -z "$SHA" ]; then
+            gh api repos/${{ github.repository }}/contents/ci-logs/run-${{ github.run_id }}.log --method PUT -f message="ci: add log for run ${{ github.run_id }} [skip ci]" -f content="$CONTENT" || echo "Content API put failed"
+          else
+            gh api repos/${{ github.repository }}/contents/ci-logs/run-${{ github.run_id }}.log --method PUT -f message="ci: update log for run ${{ github.run_id }} [skip ci]" -f content="$CONTENT" -f sha="$SHA" || echo "Content API update failed"
+          fi
