@@ -2,6 +2,7 @@ package com.example.ui.screens
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
@@ -290,7 +291,7 @@ fun DashboardQuickStatDark(label: String, value: String, icon: ImageVector, modi
 @Composable
 fun ChartBarDark(label: String, heightRatio: Float, color: Color) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Box(modifier = Modifier.width(36.dp).height((heightRatio * 90).dp).clip(RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp)).background(Brush.verticalGradient(listOf(color, color.copy(alpha = 0.5f))).shadow(4.dp, RoundedCornerShape(10.dp))))
+        Box(modifier = Modifier.width(36.dp).height((heightRatio * 90).dp).clip(RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp)).background(Brush.verticalGradient(listOf(color, color.copy(alpha = 0.5f)))))
         Spacer(modifier = Modifier.height(8.dp))
         Text(label, fontSize = 10.sp, color = Slate400, fontWeight = FontWeight.Medium)
     }
@@ -307,7 +308,7 @@ fun QuickActionCardDark(title: String, icon: ImageVector, gradient: Brush, modif
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(title, fontSize = 12.sp, fontWeight = FontWeight.ExtraBold, color = Color.White, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
                 Spacer(modifier = Modifier.height(4.dp))
-                Box(modifier = Modifier.width(20.dp, 2.dp).clip(RoundedCornerShape(1.dp)).background(LuxuryGold.copy(alpha = 0.5f)))
+                Box(modifier = Modifier.size(20.dp, 2.dp).clip(RoundedCornerShape(1.dp)).background(LuxuryGold.copy(alpha = 0.5f)))
             }
         }
     }
