@@ -19,7 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.ExpandedLegalDatabase
-import com.example.data.service.ExpandedLegalArticle
+import com.example.data.model.ExpandedLegalArticle
 import com.example.ui.theme.*
 
 @Composable

@@ -5,11 +5,16 @@ on:
     branches: [ "arena/01a095aa-meelano-legal" ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       
       - name: Set up JDK 17
         uses: actions/setup-java@v5
@@ -32,22 +37,63 @@ jobs:
           keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US" || true
           cp debug.keystore app/debug.keystore || true
 
-      - name: Build Debug APK with log capture
+      - name: Build Debug APK with full error capture
+        id: build
         run: |
-          set +e
+          set -o pipefail
+          echo "Starting build..."
           gradle assembleDebug --stacktrace --no-daemon -Dorg.gradle.jvmargs="-Xmx4g" 2>&1 | tee build.log
           EXIT_CODE=${PIPESTATUS[0]}
           echo "EXIT_CODE=$EXIT_CODE" | tee -a build.log
+          echo "exit_code=$EXIT_CODE" >> $GITHUB_OUTPUT
+          
           echo "=== APK Search ===" | tee -a build.log
-          find . -name "*.apk" -type f 2>/dev/null | tee -a build.log
-          ls -R app/build/outputs/ 2>/dev/null | head -n 200 | tee -a build.log
-          # Create dummy APK if build failed, to allow artifact upload for debugging
-          if [ ! -f "app/build/outputs/apk/debug/app-debug.apk" ]; then
-            echo "No APK found, creating info file" | tee -a build.log
-            mkdir -p app/build/outputs/apk/debug/
-            echo "Build failed, see build.log" > app/build/outputs/apk/debug/BUILD_FAILED.txt
+          find . -name "*.apk" -type f 2>/dev/null | tee -a build.log || true
+          ls -R app/build/outputs/ 2>/dev/null | head -n 300 | tee -a build.log || true
+          
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "## ❌ Build Failed - Error Analysis" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### Last 100 lines of build.log:" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            tail -n 100 build.log >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### Compilation errors (e: or error:):" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            grep -i -E "e: |error:|FAILURE|Unresolved reference|unresolved|does not exist" build.log | head -n 100 >> $GITHUB_STEP_SUMMARY || echo "No specific error pattern found" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### Full log tail 300:" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            tail -n 300 build.log >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          else
+            echo "## ✅ Build Succeeded" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "APK found:" >> $GITHUB_STEP_SUMMARY
+            find . -name "*.apk" -type f >> $GITHUB_STEP_SUMMARY
           fi
+          
+          # Always create error file for debugging
+          echo "=== BUILD LOG SUMMARY ===" > ci-error.log
+          echo "EXIT_CODE=$EXIT_CODE" >> ci-error.log
+          echo "" >> ci-error.log
+          echo "=== ERRORS ===" >> ci-error.log
+          grep -i -E "e: |error:|FAILURE|Unresolved|does not exist|not found" build.log | head -n 200 >> ci-error.log || true
+          echo "" >> ci-error.log
+          echo "=== LAST 400 LINES ===" >> ci-error.log
+          tail -n 400 build.log >> ci-error.log
+          
           exit $EXIT_CODE
+
+      - name: List APK outputs
+        if: always()
+        run: |
+          echo "Searching APKs..."
+          find . -name "*.apk" -type f 2>/dev/null | head -n 20
+          ls -lh app/build/outputs/apk/debug/ 2>/dev/null || true
+          cat ci-error.log | head -n 200 || true
 
       - name: Upload APK
         if: always()
@@ -55,16 +101,33 @@ jobs:
         with:
           name: Meelano-Legal-Luxury-APK-v2.1
           path: |
-            app/build/outputs/apk/debug/
+            app/build/outputs/apk/debug/*.apk
+            app/build/outputs/apk/**/*.apk
             build.log
+            ci-error.log
           if-no-files-found: warn
 
-      - name: Upload full logs
+      - name: Upload logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: build-logs-v2.1
           path: |
             build.log
+            ci-error.log
             app/build/reports/
           if-no-files-found: warn
+
+      - name: Push error log to branch for debugging [skip ci]
+        if: failure()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add ci-error.log build.log || true
+          # Only commit if there are changes
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "ci: add build error log for debugging [skip ci]"
+            git push origin HEAD:arena/01a095aa-meelano-legal || echo "Push failed, trying force"
+          fi

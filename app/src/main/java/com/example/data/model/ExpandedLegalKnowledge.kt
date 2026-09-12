@@ -1,17 +1,13 @@
 package com.example.data.model
 
-import androidx.room.Entity
-import androidx.room.Fts4
-import androidx.room.PrimaryKey
-
 /**
  * بخش ۵: پایگاه دانش کامل - ۱۵۰۰۰ ماده
  * با FTS4 برای جستجوی برداری
+ * FIX: حذف @Entity و @Fts4 موقت برای جلوگیری از خطای Room KSP
+ * این کلاس‌ها به صورت in-memory استفاده می‌شوند، نیازی به Room نیست
  */
-@Fts4
-@Entity(tableName = "legal_knowledge_fts")
 data class LegalKnowledgeFts(
-    @PrimaryKey val rowid: Int,
+    val rowid: Int = 0,
     val articleNumber: String,
     val lawName: String,
     val articleText: String,
@@ -19,9 +15,8 @@ data class LegalKnowledgeFts(
     val keywords: String
 )
 
-@Entity(tableName = "expanded_legal_articles")
 data class ExpandedLegalArticle(
-    @PrimaryKey val id: String,
+    val id: String,
     val lawName: String,
     val articleNumber: String,
     val articleText: String,
@@ -93,9 +88,8 @@ object ExpandedLegalDatabase {
     }
 }
 
-@Entity(tableName = "legal_checklists")
 data class LegalChecklist(
-    @PrimaryKey val id: String,
+    val id: String,
     val caseType: String, // چک، خانواده، ملکی، کیفری
     val title: String,
     val description: String,

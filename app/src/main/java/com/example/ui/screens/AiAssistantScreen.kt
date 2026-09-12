@@ -31,6 +31,7 @@ import com.example.data.service.OfflineAiService
 import com.example.data.service.VoiceRecognitionManager
 import com.example.ui.LegalViewModel
 import com.example.ui.theme.*
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,6 +53,7 @@ fun AiAssistantScreen(
     val voiceManager = remember { VoiceRecognitionManager(context) }
     val offlineService = remember { OfflineAiService() }
     val partialText by voiceManager.partialResults.collectAsStateWithLifecycle()
+    val scope = rememberCoroutineScope()
 
     val categories = listOf("همه", "حقوقی", "کیفری", "خانواده", "مواعد قضایی")
 
@@ -229,7 +231,7 @@ fun AiAssistantScreen(
                             if (inputText.isNotBlank()) {
                                 if (isOfflineMode) {
                                     // آفلاین
-                                    kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Main).launch {
+                                    scope.launch {
                                         val result = offlineService.askOffline(inputText)
                                         result.onSuccess { answer ->
                                             viewModel.sendAiMessage("آفلاین: $inputText\nپاسخ: $answer")
