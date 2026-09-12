@@ -485,7 +485,7 @@ fun LuxuryToolCardUltra(
             Spacer(modifier = Modifier.height(4.dp))
             Text(tool.subtitle, fontSize = 9.sp, color = Slate400, lineHeight = 10.sp, textAlign = TextAlign.Center, maxLines = 2)
             Spacer(modifier = Modifier.height(8.dp))
-            Box(modifier = Modifier.width(24.dp, 2.dp).clip(RoundedCornerShape(1.dp)).background(LuxuryGold.copy(alpha = 0.4f)))
+            Box(modifier = Modifier.size(24.dp, 2.dp).clip(RoundedCornerShape(1.dp)).background(LuxuryGold.copy(alpha = 0.4f)))
         }
     }
 }
