@@ -16,49 +16,39 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-          cache: gradle
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Setup Gradle
+      - name: Setup Gradle 8.10
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: 9.3.1
-
-      - name: Create gradle wrapper jar manually
-        run: |
-          mkdir -p gradle/wrapper
-          # Try to download wrapper jar, fallback to gradle wrapper task
-          gradle wrapper --gradle-version 9.3.1 || true
-          ls -la gradle/wrapper/ || true
-          chmod +x gradlew || true
+          gradle-version: 8.10.2
 
       - name: Create local.properties
         run: echo "sdk.dir=$ANDROID_HOME" > local.properties
 
       - name: Create dummy google-services.json
         run: |
-          echo '{"project_info":{"project_number":"000","project_id":"meelano-legal-luxury","storage_bucket":"dummy.appspot.com"},"client":[{"client_info":{"mobilesdk_app_id":"1:000:android:000","android_client_info":{"package_name":"com.aistudio.meelanolegal.law"}},"oauth_client":[],"api_key":[{"current_key":"dummy"}],"services":{"appinvite_service":{"other_platform_oauth_client":[]}}}],"configuration_version":"1"}' > app/google-services.json || true
+          echo '{"project_info":{"project_number":"000","project_id":"meelano-legal-luxury","storage_bucket":"dummy.appspot.com"},"client":[{"client_info":{"mobilesdk_app_id":"1:000:android:000","android_client_info":{"package_name":"com.aistudio.meelanolegal.law"}},"oauth_client":[],"api_key":[{"current_key":"dummy"}],"services":{"appinvite_service":{"other_platform_oauth_client":[]}}}],"configuration_version":"1"}' > app/google-services.json
 
-      - name: Build Debug APK - Luxury Edition
+      - name: Create debug keystore
         run: |
-          chmod +x gradlew || true
-          ./gradlew assembleDebug --stacktrace || gradle assembleDebug --stacktrace
+          keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US" || true
+          cp debug.keystore app/debug.keystore || true
+          ls -la *.keystore app/*.keystore || true
+
+      - name: Build Debug APK - Luxury Edition v2.1
+        run: gradle assembleDebug --stacktrace --no-daemon -Dorg.gradle.jvmargs="-Xmx4g"
+
+      - name: List APK outputs
+        if: always()
+        run: find app/build -name "*.apk" -type f 2>/dev/null | head -n 20; ls -lh app/build/outputs/apk/debug/ || true
 
       - name: Upload Debug APK
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: Meelano-Legal-Luxury-Debug-APK
+          name: Meelano-Legal-Luxury-v2.1-APK
           path: app/build/outputs/apk/debug/*.apk
           if-no-files-found: warn
-
-      - name: Upload Build Logs
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-logs
-          path: |
-            app/build/outputs/
-            app/build/reports/
