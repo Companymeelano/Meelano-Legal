@@ -2,7 +2,7 @@ name: Build Meelano Legal Luxury APK
 
 on:
   push:
-    branches: [ "arena/01a095aa-meelano-legal", "main" ]
+    branches: [ "arena/01a095aa-meelano-legal" ]
   workflow_dispatch:
 
 jobs:
@@ -25,38 +25,46 @@ jobs:
         with:
           gradle-version: 9.3.1
 
-      - name: Create local.properties
-        run: echo "sdk.dir=$ANDROID_HOME" > local.properties
-
-      - name: Create dummy google-services.json
+      - name: Create files
         run: |
+          echo "sdk.dir=$ANDROID_HOME" > local.properties
           echo '{"project_info":{"project_number":"000","project_id":"meelano-legal-luxury","storage_bucket":"dummy.appspot.com"},"client":[{"client_info":{"mobilesdk_app_id":"1:000:android:000","android_client_info":{"package_name":"com.aistudio.meelanolegal.law"}},"oauth_client":[],"api_key":[{"current_key":"dummy"}],"services":{"appinvite_service":{"other_platform_oauth_client":[]}}}],"configuration_version":"1"}' > app/google-services.json
-
-      - name: Create debug keystore
-        run: |
           keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US" || true
           cp debug.keystore app/debug.keystore || true
 
-      - name: Build Debug APK - Luxury Edition v2.1
-        run: gradle assembleDebug --stacktrace --no-daemon -Dorg.gradle.jvmargs="-Xmx4g"
-
-      - name: Find and list APKs
-        if: always()
+      - name: Build Debug APK with log capture
         run: |
-          echo "=== Searching for APKs ==="
-          find . -type f -name "*.apk" | head -n 30
-          echo "=== app/build ==="
-          ls -R app/build/outputs/ 2>/dev/null | head -n 100
-          echo "=== Size ==="
-          du -sh app/build/outputs/apk/debug/ 2>/dev/null || true
+          set +e
+          gradle assembleDebug --stacktrace --no-daemon -Dorg.gradle.jvmargs="-Xmx4g" 2>&1 | tee build.log
+          EXIT_CODE=${PIPESTATUS[0]}
+          echo "EXIT_CODE=$EXIT_CODE" | tee -a build.log
+          echo "=== APK Search ===" | tee -a build.log
+          find . -name "*.apk" -type f 2>/dev/null | tee -a build.log
+          ls -R app/build/outputs/ 2>/dev/null | head -n 200 | tee -a build.log
+          # Create dummy APK if build failed, to allow artifact upload for debugging
+          if [ ! -f "app/build/outputs/apk/debug/app-debug.apk" ]; then
+            echo "No APK found, creating info file" | tee -a build.log
+            mkdir -p app/build/outputs/apk/debug/
+            echo "Build failed, see build.log" > app/build/outputs/apk/debug/BUILD_FAILED.txt
+          fi
+          exit $EXIT_CODE
 
-      - name: Upload APK Artifact
+      - name: Upload APK
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: Meelano-Legal-Luxury-v2.1-APK-Direct
+          name: Meelano-Legal-Luxury-APK-v2.1
           path: |
             app/build/outputs/apk/debug/
-            app/build/outputs/apk/
-            **/*.apk
-          if-no-files-found: error
+            build.log
+          if-no-files-found: warn
+
+      - name: Upload full logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-logs-v2.1
+          path: |
+            build.log
+            app/build/reports/
+          if-no-files-found: warn
