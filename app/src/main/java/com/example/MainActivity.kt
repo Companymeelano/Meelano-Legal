@@ -97,15 +97,15 @@ fun LegalApp(viewModel: LegalViewModel = viewModel()) {
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        containerColor = com.example.ui.theme.LuxuryObsidian,
+        containerColor = com.example.ui.theme.LuxuryGreenDeep,
         bottomBar = {
             Card(
                 modifier = Modifier
                     .navigationBarsPadding()
                     .shadow(24.dp, RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)),
                 shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
-                colors = CardDefaults.cardColors(containerColor = com.example.ui.theme.LuxuryDarkCard),
-                border = BorderStroke(1.dp, com.example.ui.theme.LuxuryGold.copy(alpha = 0.2f)),
+                colors = CardDefaults.cardColors(containerColor = com.example.ui.theme.LuxuryGreenDark),
+                border = BorderStroke(1.dp, com.example.ui.theme.LuxuryGreenGold.copy(alpha = 0.25f)),
                 elevation = CardDefaults.cardElevation(20.dp)
             ) {
                 NavigationBar(
@@ -124,11 +124,11 @@ fun LegalApp(viewModel: LegalViewModel = viewModel()) {
                         },
                         label = { Text("داشبورد", fontSize = 10.sp, fontWeight = if (selectedScreen == 0) FontWeight.Bold else FontWeight.Normal) },
                         colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = com.example.ui.theme.LuxuryNavyDeep,
-                            selectedTextColor = com.example.ui.theme.LuxuryGold,
-                            indicatorColor = com.example.ui.theme.LuxuryGold,
-                            unselectedIconColor = Color(0xFF64748B),
-                            unselectedTextColor = Color(0xFF64748B)
+                            selectedIconColor = com.example.ui.theme.LuxuryGreenDeep,
+                            selectedTextColor = com.example.ui.theme.LuxuryGreenGold,
+                            indicatorColor = com.example.ui.theme.LuxuryGreenGold,
+                            unselectedIconColor = Color(0xFF6B8A7A),
+                            unselectedTextColor = Color(0xFF6B8A7A)
                         ),
                         modifier = Modifier.testTag("nav_item_dashboard")
                     )
@@ -140,11 +140,11 @@ fun LegalApp(viewModel: LegalViewModel = viewModel()) {
                         icon = { Icon(Icons.Default.Folder, contentDescription = "پرونده‌ها") },
                         label = { Text("پرونده‌ها", fontSize = 10.sp, fontWeight = if (selectedScreen == 1) FontWeight.Bold else FontWeight.Normal) },
                         colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = com.example.ui.theme.LuxuryNavyDeep,
-                            selectedTextColor = com.example.ui.theme.LuxuryGold,
-                            indicatorColor = com.example.ui.theme.LuxuryGold,
-                            unselectedIconColor = Color(0xFF64748B),
-                            unselectedTextColor = Color(0xFF64748B)
+                            selectedIconColor = com.example.ui.theme.LuxuryGreenDeep,
+                            selectedTextColor = com.example.ui.theme.LuxuryGreenGold,
+                            indicatorColor = com.example.ui.theme.LuxuryGreenGold,
+                            unselectedIconColor = Color(0xFF6B8A7A),
+                            unselectedTextColor = Color(0xFF6B8A7A)
                         ),
                         modifier = Modifier.testTag("nav_item_cases")
                     )
@@ -155,7 +155,7 @@ fun LegalApp(viewModel: LegalViewModel = viewModel()) {
                         onClick = { selectedScreen = 2 },
                         icon = {
                             BadgedBox(badge = {
-                                if (chatMessages.isNotEmpty()) Badge(containerColor = LuxuryGold, contentColor = LuxuryNavy) {
+                                if (chatMessages.isNotEmpty()) Badge(containerColor = com.example.ui.theme.LuxuryGreenGold, contentColor = com.example.ui.theme.LuxuryGreenDeep) {
                                     Text("AI", fontSize = 8.sp, fontWeight = FontWeight.ExtraBold)
                                 }
                             }) {
@@ -163,14 +163,14 @@ fun LegalApp(viewModel: LegalViewModel = viewModel()) {
                             }
                         },
                         label = {
-                            Text("میلانو AI", fontSize = 10.sp, fontWeight = FontWeight.ExtraBold, color = if (selectedScreen == 2) LuxuryGold else Color(0xFF64748B))
+                            Text("میلانو AI", fontSize = 10.sp, fontWeight = FontWeight.ExtraBold, color = if (selectedScreen == 2) com.example.ui.theme.LuxuryGreenGold else Color(0xFF6B8A7A))
                         },
                         colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = LuxuryNavy,
-                            selectedTextColor = LuxuryGold,
-                            indicatorColor = LuxuryGold,
-                            unselectedIconColor = Color(0xFF64748B),
-                            unselectedTextColor = Color(0xFF64748B)
+                            selectedIconColor = com.example.ui.theme.LuxuryGreenDeep,
+                            selectedTextColor = com.example.ui.theme.LuxuryGreenGold,
+                            indicatorColor = com.example.ui.theme.LuxuryGreenGold,
+                            unselectedIconColor = Color(0xFF6B8A7A),
+                            unselectedTextColor = Color(0xFF6B8A7A)
                         ),
                         modifier = Modifier.testTag("nav_item_ai")
                     )
@@ -181,7 +181,7 @@ fun LegalApp(viewModel: LegalViewModel = viewModel()) {
                         onClick = { selectedScreen = 3 },
                         icon = {
                             BadgedBox(badge = {
-                                if (pendingEblaghsCount > 0) Badge(containerColor = LuxuryGold, contentColor = LuxuryNavy) {
+                                if (pendingEblaghsCount > 0) Badge(containerColor = com.example.ui.theme.LuxuryGreenGold, contentColor = com.example.ui.theme.LuxuryGreenDeep) {
                                     Text(pendingEblaghsCount.toString(), fontSize = 10.sp, fontWeight = FontWeight.Bold)
                                 }
                             }) {
@@ -190,11 +190,11 @@ fun LegalApp(viewModel: LegalViewModel = viewModel()) {
                         },
                         label = { Text("آتلیه", fontSize = 10.sp, fontWeight = if (selectedScreen == 3) FontWeight.Bold else FontWeight.Normal) },
                         colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = com.example.ui.theme.LuxuryNavyDeep,
-                            selectedTextColor = com.example.ui.theme.LuxuryGold,
-                            indicatorColor = com.example.ui.theme.LuxuryGold,
-                            unselectedIconColor = Color(0xFF64748B),
-                            unselectedTextColor = Color(0xFF64748B)
+                            selectedIconColor = com.example.ui.theme.LuxuryGreenDeep,
+                            selectedTextColor = com.example.ui.theme.LuxuryGreenGold,
+                            indicatorColor = com.example.ui.theme.LuxuryGreenGold,
+                            unselectedIconColor = Color(0xFF6B8A7A),
+                            unselectedTextColor = Color(0xFF6B8A7A)
                         ),
                         modifier = Modifier.testTag("nav_item_tools")
                     )

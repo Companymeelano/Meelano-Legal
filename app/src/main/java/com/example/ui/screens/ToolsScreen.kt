@@ -18,7 +18,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -28,30 +27,30 @@ import androidx.compose.ui.unit.sp
 import com.example.ui.LegalViewModel
 import com.example.ui.theme.*
 
-// تک‌رنگ یکدست: فقط سرمه‌ای تیره + طلایی
-private val UniformDarkBg = LuxuryNavyDeep
-private val UniformCardBg = LuxuryDarkCard
-private val UniformCardElevated = LuxuryDarkCardElevated
-private val UniformGold = LuxuryGold
-private val UniformGoldBrush = LuxuryGoldDarkBrush
-private val UniformBorder = LuxuryGold.copy(alpha = 0.18f)
-private val UniformBorderStrong = LuxuryGold.copy(alpha = 0.35f)
+// تم یکدست سبز تیره لاکچری - الهام از اسکرین‌شات‌ها
+private val Bg = LuxuryGreenDeep
+private val CardBg = LuxuryGreenDark
+private val CardElev = LuxuryGreenMedium
+private val Gold = LuxuryGreenGold
+private val GoldLight = LuxuryGreenGoldLight
+private val GoldBrush = LuxuryGreenGoldBrush
+private val Border = LuxuryGreenBorder
+private val BorderStrong = LuxuryGreenBorderStrong
 
-data class ToolCategoryUniform(
+data class LegalCategoryFolder(
     val id: String,
-    val persianName: String,
-    val emoji: String,
+    val title: String,
+    val subtitle: String,
     val icon: ImageVector,
-    val description: String,
-    val count: Int
+    val count: Int,
+    val color: Color = Gold
 )
 
-data class LuxuryToolUniform(
+data class AdvancedToolUniform(
     val id: String,
     val title: String,
     val subtitle: String,
     val emoji: String,
-    val icon: ImageVector,
     val category: String
 )
 
@@ -61,47 +60,38 @@ fun ToolsScreen(
     modifier: Modifier = Modifier
 ) {
     var selectedSubScreen by remember { mutableStateOf<String?>(null) }
+    var showAdvanced by remember { mutableStateOf(false) }
 
-    val categories = remember {
+    val legalFolders = remember {
         listOf(
-            ToolCategoryUniform("court", "میز قضاوت", "⚖️", Icons.Default.Gavel, "مواعد، ابلاغیه، چک‌لیست", 6),
-            ToolCategoryUniform("brain", "مغز متفکر", "🧠", Icons.Default.SmartToy, "AI فارسی، دانش 15000 ماده", 5),
-            ToolCategoryUniform("atelier", "آتلیه لاکچری", "💎", Icons.Default.AutoAwesome, "PDF طلایی، OCR، امضا", 6),
-            ToolCategoryUniform("fortress", "دژ امنیت", "🛡️", Icons.Default.Security, "رمزنگاری، بک‌آپ، بلاک‌چین", 6)
+            LegalCategoryFolder("legal", "امور حقوقی (قراردادها، تعهدات، املاک)", "پرونده‌های حقوقی", Icons.Default.Folder, 0),
+            LegalCategoryFolder("criminal", "امور کیفری (جرم، کلاهبرداری، چک برگشتی)", "پرونده‌های کیفری", Icons.Default.Gavel, 0),
+            LegalCategoryFolder("family", "امور خانواده (طلاق، مهریه، حضانت)", "پرونده‌های خانواده", Icons.Default.FamilyRestroom, 0)
         )
     }
 
-    val tools = remember {
+    val advancedTools = remember {
         listOf(
-            LuxuryToolUniform("deadlines", "مواعد هوشمند", "شمسی + ماده ۴۴۳", "📅", Icons.Default.CalendarMonth, "court"),
-            LuxuryToolUniform("eblagh", "ابلاغیه ثنا", "API واقعی", "📨", Icons.Default.NotificationsActive, "court"),
-            LuxuryToolUniform("checklist", "چک‌لیست", "برای هر دعوا", "✅", Icons.Default.Checklist, "court"),
-            LuxuryToolUniform("prediction", "پیش‌بینی رای", "۱۰۰۰ دادنامه", "🔮", Icons.Default.AutoAwesome, "court"),
-            LuxuryToolUniform("drafts", "تنظیم لوایح", "AI فارسی", "📝", Icons.Default.EditNote, "court"),
-            LuxuryToolUniform("knowledge", "دانش ۱۵۰۰۰", "FTS برداری", "📚", Icons.Default.MenuBook, "court"),
-            LuxuryToolUniform("ai", "AI فارسی", "STT+TTS", "🎙️", Icons.Default.RecordVoiceOver, "brain"),
-            LuxuryToolUniform("knowledge2", "پایگاه دانش", "۱۵۰۰۰ ماده", "🧠", Icons.Default.MenuBook, "brain"),
-            LuxuryToolUniform("voice", "صدای وکیل", "۵ پروفایل", "🎧", Icons.Default.Mic, "brain"),
-            LuxuryToolUniform("stt", "مکالمه صوتی", "فارسی", "🔊", Icons.Default.VolumeUp, "brain"),
-            LuxuryToolUniform("offline", "AI آفلاین", "Gemma 2B", "📴", Icons.Default.CloudOff, "brain"),
-            LuxuryToolUniform("ocr", "اسکنر OCR", "فارسی", "📸", Icons.Default.CameraAlt, "atelier"),
-            LuxuryToolUniform("pdf", "PDF طلایی", "QR + لوگو M", "📄", Icons.Default.PictureAsPdf, "atelier"),
-            LuxuryToolUniform("signature", "امضای دیجیتال", "بیومتریک", "✍️", Icons.Default.Edit, "atelier"),
-            LuxuryToolUniform("theme", "تم لاکچری", "تیره طلایی", "🎨", Icons.Default.Palette, "atelier"),
-            LuxuryToolUniform("lottie", "انیمیشن", "Lottie 3D", "⭐", Icons.Default.Star, "atelier"),
-            LuxuryToolUniform("haptic", "لرزش لاکچری", "Haptic", "💫", Icons.Default.TouchApp, "atelier"),
-            LuxuryToolUniform("encrypt", "رمزنگاری", "AES-256", "🔐", Icons.Default.Lock, "fortress"),
-            LuxuryToolUniform("backup", "بک‌آپ ابری", "Drive", "☁️", Icons.Default.CloudUpload, "fortress"),
-            LuxuryToolUniform("audit", "لاگ بلاک‌چین", "SHA256", "⛓️", Icons.Default.Fingerprint, "fortress"),
-            LuxuryToolUniform("reminder", "یادآور", "هوشمند", "⏰", Icons.Default.Alarm, "fortress"),
-            LuxuryToolUniform("kmp", "نسخه KMP", "مولتی", "🌐", Icons.Default.DevicesOther, "fortress"),
-            LuxuryToolUniform("widget", "ویجت هوم", "لاکچری", "📊", Icons.Default.Dashboard, "fortress"),
+            AdvancedToolUniform("deadlines", "مواعد هوشمند", "شمسی + تعطیلات", "📅", "court"),
+            AdvancedToolUniform("eblagh", "ابلاغیه ثنا", "API واقعی", "📨", "court"),
+            AdvancedToolUniform("checklist", "چک‌لیست", "هوشمند", "✅", "court"),
+            AdvancedToolUniform("prediction", "پیش‌بینی رای", "AI", "🔮", "court"),
+            AdvancedToolUniform("knowledge", "دانش ۱۵۰۰۰", "FTS", "📚", "brain"),
+            AdvancedToolUniform("ai", "AI فارسی", "STT/TTS", "🎙️", "brain"),
+            AdvancedToolUniform("ocr", "اسکنر OCR", "فارسی", "📸", "atelier"),
+            AdvancedToolUniform("pdf", "PDF طلایی", "QR+M", "📄", "atelier"),
+            AdvancedToolUniform("signature", "امضای دیجیتال", "بیومتریک", "✍️", "atelier"),
+            AdvancedToolUniform("theme", "تم لاکچری", "تیره طلایی", "🎨", "atelier"),
+            AdvancedToolUniform("encrypt", "رمزنگاری", "AES-256", "🔐", "fortress"),
+            AdvancedToolUniform("backup", "بک‌آپ ابری", "Drive", "☁️", "fortress"),
+            AdvancedToolUniform("audit", "لاگ بلاک‌چین", "SHA256", "⛓️", "fortress"),
+            AdvancedToolUniform("reminder", "یادآور", "هوشمند", "⏰", "fortress"),
         )
     }
 
-    // Sub-screen - یکدست تیره طلایی
+    // Sub-screen - یکدست سبز تیره
     selectedSubScreen?.let { sub ->
-        Box(modifier = modifier.fillMaxSize().background(UniformDarkBg)) {
+        Box(modifier = modifier.fillMaxSize().background(Bg)) {
             when (sub) {
                 "deadlines" -> DeadlinesScreen(viewModel = viewModel, modifier = Modifier.fillMaxSize())
                 "eblagh" -> EblaghScreen(viewModel = viewModel, modifier = Modifier.fillMaxSize())
@@ -115,93 +105,236 @@ fun ToolsScreen(
                 "audit" -> AuditLogScreen(modifier = Modifier.fillMaxSize())
                 "backup" -> BackupScreen(modifier = Modifier.fillMaxSize())
                 else -> {
-                    // نمایش ابزارهای دسته
-                    val catTools = tools.filter { it.category == sub }
-                    LazyVerticalGrid(
-                        columns = GridCells.Fixed(2),
-                        modifier = Modifier.fillMaxSize().background(UniformDarkBg),
-                        contentPadding = PaddingValues(top = 80.dp, bottom = 20.dp, start = 16.dp, end = 16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        items(catTools, key = { it.id }) { tool ->
-                            UniformToolCard(tool = tool, onClick = {
-                                if (tool.id in listOf("deadlines", "eblagh", "checklist", "knowledge", "drafts", "ocr", "pdf", "signature", "audit", "backup")) {
-                                    selectedSubScreen = tool.id
-                                }
-                            })
-                        }
+                    Box(modifier = Modifier.fillMaxSize().background(Bg), contentAlignment = Alignment.Center) {
+                        Text("🚧 در حال توسعه", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
                     }
                 }
             }
-            // Back - طلایی یکدست
             Card(
                 modifier = Modifier.align(Alignment.TopStart).padding(16.dp).shadow(12.dp, CircleShape),
                 shape = CircleShape,
-                colors = CardDefaults.cardColors(containerColor = UniformCardElevated),
-                border = BorderStroke(1.dp, UniformBorderStrong)
+                colors = CardDefaults.cardColors(containerColor = CardElev),
+                border = BorderStroke(1.dp, BorderStrong)
             ) {
                 IconButton(onClick = { selectedSubScreen = null }) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "بازگشت", tint = UniformGold)
+                    Icon(Icons.Default.ArrowBack, contentDescription = "بازگشت", tint = Gold)
                 }
             }
         }
         return
     }
 
-    // صفحه اصلی - فقط 4 کارت بزرگ یکدست - بدون هیچ شلوغی
+    // صفحه اصلی - الهام از اسکرین‌شات‌ها - فوق مینیمال یکدست
     LazyColumn(
-        modifier = modifier.fillMaxSize().background(UniformDarkBg),
+        modifier = modifier.fillMaxSize().background(Bg),
         contentPadding = PaddingValues(bottom = 100.dp),
         verticalArrangement = Arrangement.spacedBy(0.dp)
     ) {
-        // هدر فوق مینیمال تک‌رنگ
+        // هدر - دقیقاً مثل اسکرین‌شات وب: سامانه جامع حقوقی
         item {
-            Box(
-                modifier = Modifier.fillMaxWidth().background(UniformDarkBg).padding(24.dp)
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(0.dp),
+                colors = CardDefaults.cardColors(containerColor = Bg),
+                border = BorderStroke(0.5.dp, Border)
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    // M طلایی - تنها رنگ
-                    Box(
-                        modifier = Modifier.size(56.dp).clip(RoundedCornerShape(14.dp)).background(UniformGoldBrush),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text("M", fontSize = 28.sp, fontWeight = FontWeight.ExtraBold, color = UniformDarkBg)
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    // راست: سامانه جامع حقوقی
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Card(shape = RoundedCornerShape(8.dp), colors = CardDefaults.cardColors(containerColor = CardElev), border = BorderStroke(0.5.dp, Border)) {
+                            Icon(Icons.Default.Balance, contentDescription = null, tint = Gold, modifier = Modifier.size(32.dp).padding(6.dp))
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Column {
+                            Text("سامانه جامع حقوقی", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                            Text("کاربر مهمان (عمومی)", fontSize = 9.sp, color = GoldLight)
+                        }
                     }
-                    Spacer(modifier = Modifier.width(14.dp))
-                    Column {
-                        Text("آتلیه ابزار", fontSize = 20.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
-                        Text("تم یکدست تیره طلایی • 4 دسته • بدون شلوغی", fontSize = 11.sp, color = Color.White.copy(alpha = 0.6f))
+                    // وسط: دستیار هوشمند میلانو
+                    Card(shape = RoundedCornerShape(12.dp), colors = CardDefaults.cardColors(containerColor = CardElev), border = BorderStroke(0.5.dp, Border)) {
+                        Row(modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Box(modifier = Modifier.size(28.dp).clip(CircleShape).background(GoldBrush), contentAlignment = Alignment.Center) {
+                                Icon(Icons.Default.SmartToy, contentDescription = null, tint = Bg, modifier = Modifier.size(16.dp))
+                            }
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Column {
+                                Text("دستیار هوشمند میلانو", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                                Text("وکیل پایه یک دادگستری", fontSize = 8.sp, color = GoldLight)
+                            }
+                        }
+                    }
+                    // چپ: دکمه‌ها
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Surface(shape = RoundedCornerShape(8.dp), color = Gold, modifier = Modifier.clickable {}) {
+                            Text("ورود / ثبت نام", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = Bg, modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp))
+                        }
                     }
                 }
             }
         }
 
-        // فقط 4 کارت - یکدست، یک رنگ، بدون گرادیانت‌های مختلف
+        // بخش راهنما - مثل اسکرین‌شات دوم
         item {
-            Column(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(14.dp)
+            Card(
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = CardBg),
+                border = BorderStroke(1.dp, Border)
             ) {
-                categories.forEach { cat ->
-                    UniformCategoryCard(category = cat, onClick = { selectedSubScreen = cat.id })
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(modifier = Modifier.size(32.dp).clip(RoundedCornerShape(8.dp)).background(GoldBrush), contentAlignment = Alignment.Center) {
+                                Text("🧭", fontSize = 16.sp)
+                            }
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Text("راهنمای هوشمند پرونده جدید", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                        }
+                        Icon(Icons.Default.Close, contentDescription = null, tint = Color.White.copy(alpha = 0.5f), modifier = Modifier.size(16.dp))
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("برای ایجاد پرونده حقوقی جدید، لطفاً حوزه دعوی (کیفری، حقوقی یا خانواده) را انتخاب کنید.", fontSize = 11.sp, color = Color.White.copy(alpha = 0.7f), lineHeight = 16.sp)
+                    Spacer(modifier = Modifier.height(14.dp))
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        legalFolders.forEach { folder ->
+                            Card(
+                                modifier = Modifier.fillMaxWidth().clickable { selectedSubScreen = folder.id },
+                                shape = RoundedCornerShape(12.dp),
+                                colors = CardDefaults.cardColors(containerColor = Bg),
+                                border = BorderStroke(1.dp, Border)
+                            ) {
+                                Row(modifier = Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(Icons.Default.Folder, contentDescription = null, tint = Gold, modifier = Modifier.size(16.dp))
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(folder.title, fontSize = 11.sp, color = Color.White)
+                                    }
+                                    Icon(Icons.Default.ArrowForward, contentDescription = null, tint = Gold, modifier = Modifier.size(14.dp))
+                                }
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(14.dp))
+                    Button(
+                        onClick = { showAdvanced = !showAdvanced },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = CardElev, contentColor = Gold),
+                        border = BorderStroke(1.dp, BorderStrong),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(if (showAdvanced) "بستن ابزار پیشرفته" else "متوجه شدم، ادامه بده - نمایش ابزار پیشرفته", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
+        }
+
+        // آرشیو پرونده‌ها - مثل اسکرین‌شات سوم - راست
+        item {
+            Card(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = CardBg),
+                border = BorderStroke(1.dp, Border)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        Text("آرشیو پرونده‌ها و دسته‌بندی‌ها", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                        Surface(shape = CircleShape, color = CardElev) {
+                            Icon(Icons.Default.Archive, contentDescription = null, tint = Gold, modifier = Modifier.size(28.dp).padding(6.dp))
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("با ورود به حساب کاربری تمامی مشاوره‌ها و پرونده‌های شما به صورت مرتب دسته‌بندی و ذخیره می‌گردد.", fontSize = 10.sp, color = Color.White.copy(alpha = 0.6f), lineHeight = 14.sp)
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Button(
+                        onClick = {},
+                        shape = RoundedCornerShape(24.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Bg, contentColor = Gold),
+                        border = BorderStroke(1.dp, BorderStrong),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("ورود / ثبت نام", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // 3 پوشه اصلی - دقیقاً مثل اسکرین‌شات
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        // حقوقی
+                        FolderCardUniform("امور حقوقی (قراردادها، تعهدات، املاک)", "0 پرونده", Icons.Default.Folder)
+                        // کیفری
+                        FolderCardUniform("امور کیفری (جرم، کلاهبرداری، چک برگشتی)", "0 پرونده", Icons.Default.Gavel)
+                        // خانواده
+                        FolderCardUniform("امور خانواده (طلاق، مهریه، حضانت)", "0 پرونده", Icons.Default.FamilyRestroom)
+                    }
+                }
+            }
+        }
+
+        // ابزار پیشرفته - فقط در صورت کلیک - یکدست
+        if (showAdvanced) {
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
+                Card(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = CardBg),
+                    border = BorderStroke(1.dp, BorderStrong)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(modifier = Modifier.size(36.dp).clip(RoundedCornerShape(10.dp)).background(GoldBrush), contentAlignment = Alignment.Center) {
+                                Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = Bg, modifier = Modifier.size(20.dp))
+                            }
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Text("ابزارهای پیشرفته لاکچری", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                        }
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text("14 ابزار هوشمند - تم یکدست سبز طلایی - بدون شلوغی", fontSize = 10.sp, color = Color.White.copy(alpha = 0.5f))
+                        Spacer(modifier = Modifier.height(12.dp))
+                        LazyVerticalGrid(
+                            columns = GridCells.Fixed(2),
+                            modifier = Modifier.fillMaxWidth().height(420.dp),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            verticalArrangement = Arrangement.spacedBy(10.dp),
+                            userScrollEnabled = false
+                        ) {
+                            items(advancedTools, key = { it.id }) { tool ->
+                                Card(
+                                    modifier = Modifier.fillMaxWidth().clickable {
+                                        if (tool.id in listOf("deadlines", "eblagh", "checklist", "knowledge", "ocr", "pdf", "signature", "audit", "backup")) {
+                                            selectedSubScreen = tool.id
+                                        }
+                                    },
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = CardDefaults.cardColors(containerColor = Bg),
+                                    border = BorderStroke(1.dp, Border)
+                                ) {
+                                    Column(modifier = Modifier.padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                                        Text(tool.emoji, fontSize = 20.sp)
+                                        Spacer(modifier = Modifier.height(6.dp))
+                                        Text(tool.title, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Color.White, textAlign = TextAlign.Center)
+                                        Text(tool.subtitle, fontSize = 8.sp, color = Color.White.copy(alpha = 0.5f), textAlign = TextAlign.Center)
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
 
         item {
             Spacer(modifier = Modifier.height(24.dp))
-            // فوتر مینیمال تک‌رنگ
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(modifier = Modifier.size(30.dp, 1.dp).background(UniformGold.copy(alpha = 0.3f)))
+            Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp), horizontalArrangement = Arrangement.Center) {
+                Box(modifier = Modifier.width(40.dp, 1.dp).background(Gold.copy(alpha = 0.3f)))
                 Spacer(modifier = Modifier.width(12.dp))
-                Text("میلانو لگال • تم یکدست تیره طلایی", fontSize = 10.sp, color = Color.White.copy(alpha = 0.4f))
+                Text("میلانو لگال • الهام از وب • تم یکدست", fontSize = 9.sp, color = Color.White.copy(alpha = 0.3f))
                 Spacer(modifier = Modifier.width(12.dp))
-                Box(modifier = Modifier.size(30.dp, 1.dp).background(UniformGold.copy(alpha = 0.3f)))
+                Box(modifier = Modifier.width(40.dp, 1.dp).background(Gold.copy(alpha = 0.3f)))
             }
             Spacer(modifier = Modifier.height(20.dp))
         }
@@ -209,69 +342,25 @@ fun ToolsScreen(
 }
 
 @Composable
-fun UniformCategoryCard(
-    category: ToolCategoryUniform,
-    onClick: () -> Unit
-) {
+fun FolderCardUniform(title: String, count: String, icon: ImageVector) {
     Card(
-        modifier = Modifier.fillMaxWidth().shadow(8.dp, RoundedCornerShape(18.dp)).clip(RoundedCornerShape(18.dp)).clickable { onClick() },
-        shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(containerColor = UniformCardBg),
-        border = BorderStroke(1.dp, UniformBorder),
-        elevation = CardDefaults.cardElevation(4.dp)
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = Bg),
+        border = BorderStroke(1.dp, Border)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(18.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // آیکون خلاقانه تک‌رنگ طلایی - یکدست
-            Box(
-                modifier = Modifier.size(56.dp).clip(RoundedCornerShape(14.dp)).background(UniformGoldBrush),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(category.emoji, fontSize = 24.sp)
-            }
-            Spacer(modifier = Modifier.width(14.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(category.persianName, fontSize = 15.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
-                Spacer(modifier = Modifier.height(3.dp))
-                Text(category.description, fontSize = 11.sp, color = Color.White.copy(alpha = 0.55f))
-                Spacer(modifier = Modifier.height(6.dp))
-                Surface(shape = RoundedCornerShape(6.dp), color = UniformGold.copy(alpha = 0.12f), border = BorderStroke(0.5.dp, UniformGold.copy(alpha = 0.25f))) {
-                    Text("${category.count} ابزار", fontSize = 9.sp, color = UniformGold, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp))
+        Row(modifier = Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+                Icon(icon, contentDescription = null, tint = Gold, modifier = Modifier.size(16.dp))
+                Spacer(modifier = Modifier.width(8.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(title, fontSize = 10.sp, color = Color.White, lineHeight = 12.sp)
+                    Text(count, fontSize = 8.sp, color = Color.White.copy(alpha = 0.4f))
                 }
             }
-            Icon(Icons.Default.ChevronLeft, contentDescription = null, tint = UniformGold.copy(alpha = 0.5f), modifier = Modifier.size(20.dp))
-        }
-    }
-}
-
-@Composable
-fun UniformToolCard(
-    tool: LuxuryToolUniform,
-    onClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth().shadow(6.dp, RoundedCornerShape(16.dp)).clip(RoundedCornerShape(16.dp)).clickable { onClick() },
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = UniformCardBg),
-        border = BorderStroke(1.dp, UniformBorder),
-        elevation = CardDefaults.cardElevation(4.dp)
-    ) {
-        Column(
-            modifier = Modifier.fillMaxWidth().padding(14.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Box(
-                modifier = Modifier.size(48.dp).clip(RoundedCornerShape(12.dp)).background(UniformGoldBrush),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(tool.emoji, fontSize = 22.sp)
+            Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                Icon(Icons.Default.Edit, contentDescription = null, tint = Color.White.copy(alpha = 0.4f), modifier = Modifier.size(12.dp))
+                Icon(Icons.Default.Delete, contentDescription = null, tint = Color.White.copy(alpha = 0.4f), modifier = Modifier.size(12.dp))
             }
-            Spacer(modifier = Modifier.height(10.dp))
-            Text(tool.title, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.White, textAlign = TextAlign.Center, lineHeight = 12.sp)
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(tool.subtitle, fontSize = 9.sp, color = Color.White.copy(alpha = 0.5f), textAlign = TextAlign.Center)
         }
     }
 }

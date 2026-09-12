@@ -65,6 +65,7 @@ val LuxuryGold = Color(0xFFFFD700)
 val LuxuryGoldLight = Color(0xFFFFE55C)
 val LuxuryGoldDark = Color(0xFFB8860B)
 val LuxuryGoldDeep = Color(0xFF8B6914)
+val LuxuryGoldBright = Color(0xFFFFC94A) // طلایی جذاب‌تر از اسکرین‌شات‌ها
 val LuxuryGoldGradientStart = Color(0xFFFFD700)
 val LuxuryGoldGradientEnd = Color(0xFFFFA500)
 val LuxuryGoldShimmer = Color(0xFFFFF8DC)
@@ -80,6 +81,20 @@ val LuxuryObsidian = Color(0xFF0B0F1A)
 val LuxuryCharcoal = Color(0xFF151A2A)
 val LuxuryGraphite = Color(0xFF1E2538)
 
+// ===== NEW: DARK GREEN LUXURY - Inspired by Screenshots =====
+// اسکرین‌شات‌ها: پس‌زمینه سبز تیره بسیار جذاب #0A1F14
+val LuxuryGreenDeep = Color(0xFF0A1F14) // پس‌زمینه اصلی - سبز تیره عمیق
+val LuxuryGreenDark = Color(0xFF0D2818) // کارت اصلی
+val LuxuryGreenMedium = Color(0xFF132E20) // کارت متوسط
+val LuxuryGreenLight = Color(0xFF1A3A28) // کارت روشن
+val LuxuryGreenElevated = Color(0xFF1F4A32) // کارت برجسته
+val LuxuryGreenBorder = Color(0x30D4AF37) // بوردر طلایی کم‌رنگ
+val LuxuryGreenBorderStrong = Color(0x60D4AF37) // بوردر طلایی پررنگ
+val LuxuryGreenGold = Color(0xFFD4AF37) // طلایی جذاب اسکرین‌شات‌ها (طلایی کهنه)
+val LuxuryGreenGoldLight = Color(0xFFF0D878) // طلایی روشن
+val LuxuryGreenGoldDark = Color(0xFF8B7355) // طلایی تیره
+val LuxuryGreenAccent = Color(0xFF2A5A3A) // سبز اکسنت
+
 // Emerald Luxury
 val LuxuryEmerald = Color(0xFF00D4AA)
 val LuxuryEmeraldDark = Color(0xFF059669)
@@ -89,6 +104,7 @@ val LuxuryEmeraldGlow = Color(0x4000D4AA)
 val GlassWhite = Color(0x80FFFFFF)
 val GlassDark = Color(0x801E293B)
 val GlassGold = Color(0x20FFD700)
+val GlassGreenGold = Color(0x20D4AF37)
 val LuxuryCardShadow = Color(0x80000000)
 val LuxuryGlow = Color(0x334F46E5)
 val LuxuryDarkCard = Color(0xFF1A1F33)
@@ -103,11 +119,23 @@ val LuxuryGoldBrush = Brush.linearGradient(
 val LuxuryGoldDarkBrush = Brush.linearGradient(
     colors = listOf(LuxuryGoldDeep, LuxuryGoldDark, LuxuryGold)
 )
+val LuxuryGoldBrightBrush = Brush.linearGradient(
+    colors = listOf(LuxuryGreenGold, LuxuryGold, LuxuryGreenGoldLight)
+)
 val LuxuryNavyBrush = Brush.linearGradient(
     colors = listOf(LuxuryNavyGradientStart, LuxuryNavyGradientEnd)
 )
 val LuxuryObsidianBrush = Brush.linearGradient(
     colors = listOf(LuxuryObsidian, LuxuryCharcoal, LuxuryNavy)
+)
+val LuxuryGreenBrush = Brush.linearGradient(
+    colors = listOf(LuxuryGreenDeep, LuxuryGreenDark, LuxuryGreenMedium)
+)
+val LuxuryGreenDarkBrush = Brush.linearGradient(
+    colors = listOf(LuxuryGreenDeep, LuxuryGreenDark)
+)
+val LuxuryGreenGoldBrush = Brush.linearGradient(
+    colors = listOf(LuxuryGreenGoldDark, LuxuryGreenGold, LuxuryGreenGoldLight)
 )
 val LuxuryPremiumBrush = Brush.linearGradient(
     colors = listOf(Color(0xFF4F46E5), Color(0xFF7C3AED), Color(0xFFFFD700))
@@ -126,6 +154,9 @@ val LuxuryGoldShimmerBrush = Brush.linearGradient(
 )
 val LuxuryCardGoldBorderBrush = Brush.linearGradient(
     colors = listOf(LuxuryGold.copy(alpha = 0.8f), LuxuryGoldLight.copy(alpha = 0.3f), LuxuryGoldDark.copy(alpha = 0.6f))
+)
+val LuxuryGreenGoldBorderBrush = Brush.linearGradient(
+    colors = listOf(LuxuryGreenGold.copy(alpha = 0.8f), LuxuryGreenGoldLight.copy(alpha = 0.3f), LuxuryGreenGoldDark.copy(alpha = 0.6f))
 )
 
 // Backward compatible aliases

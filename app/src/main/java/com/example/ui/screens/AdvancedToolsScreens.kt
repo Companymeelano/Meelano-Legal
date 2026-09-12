@@ -23,12 +23,12 @@ import com.example.data.model.ChecklistDatabase
 import com.example.data.service.AuditLogService
 import com.example.ui.theme.*
 
-private val Bg = LuxuryNavyDeep
-private val CardBg = LuxuryDarkCard
-private val CardElev = LuxuryDarkCardElevated
-private val Gold = LuxuryGold
-private val GoldBrush = LuxuryGoldDarkBrush
-private val Border = Gold.copy(alpha = 0.18f)
+private val Bg = LuxuryGreenDeep
+private val CardBg = LuxuryGreenDark
+private val CardElev = LuxuryGreenMedium
+private val Gold = LuxuryGreenGold
+private val GoldBrush = LuxuryGreenGoldBrush
+private val Border = LuxuryGreenBorder
 
 @Composable
 fun ChecklistScreen(modifier: Modifier = Modifier) {
