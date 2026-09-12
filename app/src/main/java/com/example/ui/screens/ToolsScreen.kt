@@ -36,7 +36,7 @@ fun ToolsScreen(
     var selectedSubScreen by remember { mutableStateOf<String?>(null) }
     val categories = listOf("قضایی", "هوشمند", "سیستم")
 
-    // Sub-screen navigation
+    // Sub-screen navigation - هوشمند بدون شلوغی
     selectedSubScreen?.let { sub ->
         Box(modifier = modifier.fillMaxSize()) {
             when (sub) {
@@ -44,13 +44,21 @@ fun ToolsScreen(
                 "eblagh" -> EblaghScreen(viewModel = viewModel, modifier = Modifier.fillMaxSize())
                 "drafts" -> DraftingStudioScreen(viewModel = viewModel, modifier = Modifier.fillMaxSize())
                 "settings" -> SettingsScreen(viewModel = viewModel, modifier = Modifier.fillMaxSize())
+                "knowledge" -> KnowledgeBaseScreen(modifier = Modifier.fillMaxSize())
+                "checklist" -> ChecklistScreen(modifier = Modifier.fillMaxSize())
+                "ocr" -> OcrScannerScreen(modifier = Modifier.fillMaxSize())
+                "pdf" -> PdfLuxuryScreen(modifier = Modifier.fillMaxSize())
+                "signature" -> SignatureScreen(modifier = Modifier.fillMaxSize())
+                "audit" -> AuditLogScreen(modifier = Modifier.fillMaxSize())
+                "backup" -> BackupScreen(modifier = Modifier.fillMaxSize())
                 else -> {}
             }
-            // Back button
+            // Back button لاکچری
             Card(
-                modifier = Modifier.align(Alignment.TopStart).padding(16.dp).shadow(8.dp, CircleShape),
+                modifier = Modifier.align(Alignment.TopStart).padding(16.dp).shadow(12.dp, CircleShape),
                 shape = CircleShape,
-                colors = CardDefaults.cardColors(containerColor = Color.White)
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                border = BorderStroke(1.dp, Slate200)
             ) {
                 IconButton(onClick = { selectedSubScreen = null }) {
                     Icon(Icons.Default.ArrowBack, contentDescription = "بازگشت", tint = Slate900)
@@ -121,14 +129,14 @@ fun ToolsScreen(
                 }
                 item {
                     Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        LuxuryToolCard("چک‌لیست\nهوشمند", "${ChecklistDatabase.allChecklists.size} چک‌لیست\nبخش ۸", Icons.Default.Checklist, Brush.linearGradient(listOf(Emerald500, Emerald600)), Modifier.weight(1f)) {}
-                        LuxuryToolCard("پیش‌بینی رای\nAI", "تحلیل ۱۰۰۰ دادنامه\nبخش ۷", Icons.Default.AutoAwesome, Brush.linearGradient(listOf(Amber500, Amber600)), Modifier.weight(1f)) {}
+                        LuxuryToolCard("چک‌لیست\nهوشمند", "${ChecklistDatabase.allChecklists.size} چک‌لیست\nبخش ۸", Icons.Default.Checklist, Brush.linearGradient(listOf(Emerald500, Emerald600)), Modifier.weight(1f)) { selectedSubScreen = "checklist" }
+                        LuxuryToolCard("پیش‌بینی رای\nAI", "تحلیل ۱۰۰۰ دادنامه\nبخش ۷", Icons.Default.AutoAwesome, Brush.linearGradient(listOf(Amber500, Amber600)), Modifier.weight(1f)) { selectedSubScreen = "knowledge" }
                     }
                 }
                 item {
                     Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         LuxuryToolCard("تنظیم لوایح\nهوشمند", "AI + صدای فارسی\nبخش ۱،۲،۴", Icons.Default.EditNote, Brush.linearGradient(listOf(Indigo600, LuxuryGold)), Modifier.weight(1f)) { selectedSubScreen = "drafts" }
-                        LuxuryToolCard("ویجت مواعد\nبحرانی", "هوم‌اسکرین\nبخش ۱۲", Icons.Default.Widgets, Brush.linearGradient(listOf(Rose500, Rose600)), Modifier.weight(1f)) {}
+                        LuxuryToolCard("پایگاه دانش\n۱۵۰۰۰ ماده", "FTS + Vector\nبخش ۵", Icons.Default.MenuBook, Brush.linearGradient(listOf(LuxuryGold, LuxuryGoldDark)), Modifier.weight(1f)) { selectedSubScreen = "knowledge" }
                     }
                 }
 
@@ -171,13 +179,13 @@ fun ToolsScreen(
 
                 item {
                     Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        LuxuryToolCard("اسکنر\nOCR فارسی", "ML Kit + Document AI\nبخش ۱۴", Icons.Default.DocumentScanner, Brush.linearGradient(listOf(Indigo600, Indigo800)), Modifier.weight(1f)) {}
-                        LuxuryToolCard("PDF لاکچری\nطلایی", "سربرگ + QR + لوگو M\nبخش ۱۸", Icons.Default.PictureAsPdf, Brush.linearGradient(listOf(Rose500, Rose600)), Modifier.weight(1f)) {}
+                        LuxuryToolCard("اسکنر\nOCR فارسی", "ML Kit + Document AI\nبخش ۱۴", Icons.Default.DocumentScanner, Brush.linearGradient(listOf(Indigo600, Indigo800)), Modifier.weight(1f)) { selectedSubScreen = "ocr" }
+                        LuxuryToolCard("PDF لاکچری\nطلایی", "سربرگ + QR + لوگو M\nبخش ۱۸", Icons.Default.PictureAsPdf, Brush.linearGradient(listOf(Rose500, Rose600)), Modifier.weight(1f)) { selectedSubScreen = "pdf" }
                     }
                 }
                 item {
                     Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        LuxuryToolCard("امضای\nدیجیتال", "اثر انگشت + بیومتریک\nبخش ۱۵", Icons.Default.Draw, Brush.linearGradient(listOf(Emerald500, Emerald600)), Modifier.weight(1f)) {}
+                        LuxuryToolCard("امضای\nدیجیتال", "اثر انگشت + بیومتریک\nبخش ۱۵", Icons.Default.Draw, Brush.linearGradient(listOf(Emerald500, Emerald600)), Modifier.weight(1f)) { selectedSubScreen = "signature" }
                         LuxuryToolCard("صدای وکیل\nشخصی", "۵ پروفایل صوتی\nبخش ۴", Icons.Default.RecordVoiceOver, Brush.linearGradient(listOf(Amber500, Amber600)), Modifier.weight(1f)) { selectedSubScreen = "settings" }
                     }
                 }
@@ -235,19 +243,19 @@ fun ToolsScreen(
                 item {
                     Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         LuxuryToolCard("رمزنگاری\nSQLCipher", "AES-256 + بیومتریک\nبخش ۲۱", Icons.Default.Lock, Brush.linearGradient(listOf(Slate800, Slate900)), Modifier.weight(1f)) { selectedSubScreen = "settings" }
-                        LuxuryToolCard("بک‌آپ ابری\nDrive", "رمزنگاری شده\nبخش ۲۳", Icons.Default.CloudUpload, Brush.linearGradient(listOf(Sky500, Sky600)), Modifier.weight(1f)) { selectedSubScreen = "settings" }
+                        LuxuryToolCard("بک‌آپ ابری\nDrive", "رمزنگاری شده\nبخش ۲۳", Icons.Default.CloudUpload, Brush.linearGradient(listOf(Sky500, Sky600)), Modifier.weight(1f)) { selectedSubScreen = "backup" }
                     }
                 }
                 item {
                     Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        LuxuryToolCard("لاگ قضایی\nبلاک‌چین", "مهر زمانی\nبخش ۲۴", Icons.Default.Fingerprint, Brush.linearGradient(listOf(Amber500, Amber600)), Modifier.weight(1f)) { selectedSubScreen = "settings" }
+                        LuxuryToolCard("لاگ قضایی\nبلاک‌چین", "مهر زمانی\nبخش ۲۴", Icons.Default.Fingerprint, Brush.linearGradient(listOf(Amber500, Amber600)), Modifier.weight(1f)) { selectedSubScreen = "audit" }
                         LuxuryToolCard("یادآور\nهوشمند", "WorkManager + TTS فارسی\nبخش ۱۷", Icons.Default.NotificationsActive, Brush.linearGradient(listOf(Emerald500, Emerald600)), Modifier.weight(1f)) {}
                     }
                 }
                 item {
                     Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         LuxuryToolCard("تم پویا\nلاکچری", "روز/شب + طلایی\nبخش ۱۰", Icons.Default.Palette, Brush.linearGradient(listOf(Indigo600, LuxuryGold)), Modifier.weight(1f)) { selectedSubScreen = "settings" }
-                        LuxuryToolCard("نسخه KMP\nوب و iOS", "مولتی‌پلتفرم\nبخش ۲۰", Icons.Default.Devices, Brush.linearGradient(listOf(Indigo600, Sky500)), Modifier.weight(1f)) {}
+                        LuxuryToolCard("نسخه KMP\nوب و iOS", "مولتی‌پلتفرم\nبخش ۲۰", Icons.Default.Devices, Brush.linearGradient(listOf(Indigo600, Sky500)), Modifier.weight(1f)) { selectedSubScreen = "settings" }
                     }
                 }
 
