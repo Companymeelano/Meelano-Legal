@@ -29,15 +29,20 @@ fun KnowledgeBaseScreen(
     var searchQuery by remember { mutableStateOf("") }
     var searchResults by remember { mutableStateOf<List<ExpandedLegalArticle>>(emptyList()) }
     var selectedCategory by remember { mutableStateOf("همه") }
+    var isSearching by remember { mutableStateOf(false) }
 
     val categories = listOf("همه", "قراردادها", "مواعد", "چک", "خانواده", "کیفری")
 
+    // Debounced search to prevent hang
     LaunchedEffect(searchQuery) {
+        isSearching = true
+        kotlinx.coroutines.delay(400) // debounce 400ms
         searchResults = if (searchQuery.isBlank()) {
             ExpandedLegalDatabase.searchAdvanced("ماده")
         } else {
             ExpandedLegalDatabase.searchAdvanced(searchQuery)
         }
+        isSearching = false
     }
 
     LazyColumn(

@@ -97,14 +97,15 @@ fun LegalApp(viewModel: LegalViewModel = viewModel()) {
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
+        containerColor = com.example.ui.theme.LuxuryObsidian,
         bottomBar = {
             Card(
                 modifier = Modifier
                     .navigationBarsPadding()
-                    .shadow(20.dp, RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)),
+                    .shadow(24.dp, RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)),
                 shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                border = BorderStroke(1.dp, Slate100),
+                colors = CardDefaults.cardColors(containerColor = com.example.ui.theme.LuxuryDarkCard),
+                border = BorderStroke(1.dp, com.example.ui.theme.LuxuryGold.copy(alpha = 0.2f)),
                 elevation = CardDefaults.cardElevation(20.dp)
             ) {
                 NavigationBar(
@@ -123,11 +124,11 @@ fun LegalApp(viewModel: LegalViewModel = viewModel()) {
                         },
                         label = { Text("داشبورد", fontSize = 10.sp, fontWeight = if (selectedScreen == 0) FontWeight.Bold else FontWeight.Normal) },
                         colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = Color.White,
-                            selectedTextColor = MaterialTheme.colorScheme.primary,
-                            indicatorColor = MaterialTheme.colorScheme.primary,
-                            unselectedIconColor = Color(0xFF94A3B8),
-                            unselectedTextColor = Color(0xFF94A3B8)
+                            selectedIconColor = com.example.ui.theme.LuxuryNavyDeep,
+                            selectedTextColor = com.example.ui.theme.LuxuryGold,
+                            indicatorColor = com.example.ui.theme.LuxuryGold,
+                            unselectedIconColor = Color(0xFF64748B),
+                            unselectedTextColor = Color(0xFF64748B)
                         ),
                         modifier = Modifier.testTag("nav_item_dashboard")
                     )
@@ -139,11 +140,11 @@ fun LegalApp(viewModel: LegalViewModel = viewModel()) {
                         icon = { Icon(Icons.Default.Folder, contentDescription = "پرونده‌ها") },
                         label = { Text("پرونده‌ها", fontSize = 10.sp, fontWeight = if (selectedScreen == 1) FontWeight.Bold else FontWeight.Normal) },
                         colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = Color.White,
-                            selectedTextColor = MaterialTheme.colorScheme.primary,
-                            indicatorColor = MaterialTheme.colorScheme.primary,
-                            unselectedIconColor = Color(0xFF94A3B8),
-                            unselectedTextColor = Color(0xFF94A3B8)
+                            selectedIconColor = com.example.ui.theme.LuxuryNavyDeep,
+                            selectedTextColor = com.example.ui.theme.LuxuryGold,
+                            indicatorColor = com.example.ui.theme.LuxuryGold,
+                            unselectedIconColor = Color(0xFF64748B),
+                            unselectedTextColor = Color(0xFF64748B)
                         ),
                         modifier = Modifier.testTag("nav_item_cases")
                     )
@@ -162,19 +163,19 @@ fun LegalApp(viewModel: LegalViewModel = viewModel()) {
                             }
                         },
                         label = {
-                            Text("میلانو AI", fontSize = 10.sp, fontWeight = FontWeight.ExtraBold, color = if (selectedScreen == 2) LuxuryGold else Color(0xFF94A3B8))
+                            Text("میلانو AI", fontSize = 10.sp, fontWeight = FontWeight.ExtraBold, color = if (selectedScreen == 2) LuxuryGold else Color(0xFF64748B))
                         },
                         colors = NavigationBarItemDefaults.colors(
                             selectedIconColor = LuxuryNavy,
                             selectedTextColor = LuxuryGold,
                             indicatorColor = LuxuryGold,
-                            unselectedIconColor = Color(0xFF94A3B8),
-                            unselectedTextColor = Color(0xFF94A3B8)
+                            unselectedIconColor = Color(0xFF64748B),
+                            unselectedTextColor = Color(0xFF64748B)
                         ),
                         modifier = Modifier.testTag("nav_item_ai")
                     )
 
-                    // 3: ابزارها - دسته‌بندی هوشمند (قضایی، هوشمند، سیستم)
+                    // 3: ابزارها - دسته‌بندی هوشمند 4گانه تیره
                     NavigationBarItem(
                         selected = selectedScreen == 3,
                         onClick = { selectedScreen = 3 },
@@ -187,13 +188,13 @@ fun LegalApp(viewModel: LegalViewModel = viewModel()) {
                                 Icon(Icons.Default.Build, contentDescription = "ابزارها")
                             }
                         },
-                        label = { Text("ابزار لاکچری", fontSize = 10.sp, fontWeight = if (selectedScreen == 3) FontWeight.Bold else FontWeight.Normal) },
+                        label = { Text("آتلیه", fontSize = 10.sp, fontWeight = if (selectedScreen == 3) FontWeight.Bold else FontWeight.Normal) },
                         colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = Color.White,
-                            selectedTextColor = MaterialTheme.colorScheme.primary,
-                            indicatorColor = MaterialTheme.colorScheme.primary,
-                            unselectedIconColor = Color(0xFF94A3B8),
-                            unselectedTextColor = Color(0xFF94A3B8)
+                            selectedIconColor = com.example.ui.theme.LuxuryNavyDeep,
+                            selectedTextColor = com.example.ui.theme.LuxuryGold,
+                            indicatorColor = com.example.ui.theme.LuxuryGold,
+                            unselectedIconColor = Color(0xFF64748B),
+                            unselectedTextColor = Color(0xFF64748B)
                         ),
                         modifier = Modifier.testTag("nav_item_tools")
                     )
