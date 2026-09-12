@@ -41,6 +41,7 @@ fun DashboardScreen(
 
     var selectedCaseForPrediction by remember { mutableStateOf<LegalCase?>(null) }
     var predictionResult by remember { mutableStateOf<com.example.data.service.PredictionResult?>(null) }
+    val coroutineScope = rememberCoroutineScope()
 
     LazyColumn(
         modifier = modifier.fillMaxSize().background(Slate50),
@@ -134,8 +135,7 @@ fun DashboardScreen(
                                         TextButton(onClick = {
                                             selectedCaseForPrediction = c
                                             expanded = false
-                                            // شبیه‌سازی پیش‌بینی
-                                            kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.Main).launch {
+                                            coroutineScope.launch {
                                                 predictionResult = PredictionService.predictCaseOutcome(c)
                                             }
                                         }, modifier = Modifier.fillMaxWidth()) {
@@ -229,7 +229,7 @@ fun DashboardScreen(
         // دسترسی سریع لاکچری
         item {
             Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                QuickActionCard("اسکنر هوشمند", Icons.Default.DocumentScanner, Brush.linearGradient(listOf(Indigo600, Indigo800)), Modifier.weight(1f)) { onNavigateToCases() }
+                QuickActionCard("اسکنر هوشمند", Icons.Default.CameraAlt, Brush.linearGradient(listOf(Indigo600, Indigo800)), Modifier.weight(1f)) { onNavigateToCases() }
                 QuickActionCard("AI فارسی", Icons.Default.SmartToy, Brush.linearGradient(listOf(LuxuryGold, LuxuryGoldDark)), Modifier.weight(1f)) { onNavigateToAi() }
                 QuickActionCard("PDF لاکچری", Icons.Default.PictureAsPdf, Brush.linearGradient(listOf(Emerald500, Emerald600)), Modifier.weight(1f)) { onNavigateToCases() }
             }

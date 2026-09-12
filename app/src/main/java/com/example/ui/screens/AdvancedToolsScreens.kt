@@ -77,7 +77,7 @@ fun OcrScannerScreen(modifier: Modifier = Modifier) {
             Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors(containerColor = Color.White), border = BorderStroke(1.dp, Indigo100), elevation = CardDefaults.cardElevation(4.dp)) {
                 Column(modifier = Modifier.padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                     Box(modifier = Modifier.size(80.dp).clip(CircleShape).background(Brush.linearGradient(listOf(Indigo600, Indigo800))), contentAlignment = Alignment.Center) {
-                        Icon(Icons.Default.DocumentScanner, contentDescription = null, tint = Color.White, modifier = Modifier.size(40.dp))
+                        Icon(Icons.Default.CameraAlt, contentDescription = null, tint = Color.White, modifier = Modifier.size(40.dp))
                     }
                     Spacer(modifier = Modifier.height(16.dp))
                     Text("اسکنر هوشمند OCR فارسی", fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)
@@ -157,7 +157,7 @@ fun SignatureScreen(modifier: Modifier = Modifier) {
             Card(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors(containerColor = Color.White), border = BorderStroke(1.dp, Emerald100), elevation = CardDefaults.cardElevation(4.dp)) {
                 Column(modifier = Modifier.padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                     Box(modifier = Modifier.size(80.dp).clip(CircleShape).background(Brush.linearGradient(listOf(Emerald500, Emerald600))), contentAlignment = Alignment.Center) {
-                        Icon(Icons.Default.Draw, contentDescription = null, tint = Color.White, modifier = Modifier.size(40.dp))
+                        Icon(Icons.Default.Edit, contentDescription = null, tint = Color.White, modifier = Modifier.size(40.dp))
                     }
                     Spacer(modifier = Modifier.height(16.dp))
                     Text("امضای دیجیتال لاکچری", fontSize = 18.sp, fontWeight = FontWeight.ExtraBold)

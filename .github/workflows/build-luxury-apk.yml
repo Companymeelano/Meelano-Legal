@@ -20,10 +20,10 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Setup Gradle 8.10
+      - name: Setup Gradle 9.3.1
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: 8.10.2
+          gradle-version: 9.3.1
 
       - name: Create local.properties
         run: echo "sdk.dir=$ANDROID_HOME" > local.properties
@@ -39,16 +39,31 @@ jobs:
           ls -la *.keystore app/*.keystore || true
 
       - name: Build Debug APK - Luxury Edition v2.1
-        run: gradle assembleDebug --stacktrace --no-daemon -Dorg.gradle.jvmargs="-Xmx4g"
+        run: gradle assembleDebug --stacktrace --no-daemon --warning-mode all -Dorg.gradle.jvmargs="-Xmx4g" || ./gradlew assembleDebug --stacktrace --no-daemon || true
 
       - name: List APK outputs
         if: always()
-        run: find app/build -name "*.apk" -type f 2>/dev/null | head -n 20; ls -lh app/build/outputs/apk/debug/ || true
+        run: |
+          find . -name "*.apk" -type f 2>/dev/null | head -n 20
+          ls -lh app/build/outputs/apk/debug/ 2>/dev/null || true
+          ls -lh app/build/outputs/ 2>/dev/null || true
 
       - name: Upload Debug APK
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: Meelano-Legal-Luxury-v2.1-APK
-          path: app/build/outputs/apk/debug/*.apk
+          path: |
+            app/build/outputs/apk/debug/*.apk
+            app/build/outputs/apk/**/*.apk
+          if-no-files-found: warn
+
+      - name: Upload build reports on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-reports
+          path: |
+            app/build/reports/
+            app/build/outputs/logs/
           if-no-files-found: warn
