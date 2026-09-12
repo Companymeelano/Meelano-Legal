@@ -330,11 +330,11 @@ fun ToolsScreen(
         item {
             Spacer(modifier = Modifier.height(24.dp))
             Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp), horizontalArrangement = Arrangement.Center) {
-                Box(modifier = Modifier.width(40.dp, 1.dp).background(Gold.copy(alpha = 0.3f)))
+                Box(modifier = Modifier.width(40.dp).height(1.dp).background(Gold.copy(alpha = 0.3f)))
                 Spacer(modifier = Modifier.width(12.dp))
                 Text("میلانو لگال • الهام از وب • تم یکدست", fontSize = 9.sp, color = Color.White.copy(alpha = 0.3f))
                 Spacer(modifier = Modifier.width(12.dp))
-                Box(modifier = Modifier.width(40.dp, 1.dp).background(Gold.copy(alpha = 0.3f)))
+                Box(modifier = Modifier.width(40.dp).height(1.dp).background(Gold.copy(alpha = 0.3f)))
             }
             Spacer(modifier = Modifier.height(20.dp))
         }
