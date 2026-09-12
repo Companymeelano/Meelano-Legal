@@ -105,7 +105,7 @@ fun AiAssistantScreen(
                             Surface(
                                 shape = RoundedCornerShape(12.dp),
                                 color = if (isListening) Rose500 else Color.White.copy(alpha = 0.15f),
-                                border = BorderStroke(1.dp, if (isListening) Rose300 else Color.White.copy(alpha = 0.2f)),
+                                border = BorderStroke(1.dp, if (isListening) Rose500 else Color.White.copy(alpha = 0.2f)),
                                 modifier = Modifier.weight(1f).clickable {
                                     if (isListening) {
                                         voiceManager.stopListening()
@@ -227,7 +227,7 @@ fun AiAssistantScreen(
                         }
                         Spacer(modifier = Modifier.width(6.dp))
                         // Send - بخش ۱۳ Haptic
-                        Box(modifier = Modifier.size(52.dp).clip(CircleShape).background(if (inputText.isBlank()) Slate300 else LuxuryPremiumBrush).shadow(8.dp, CircleShape).clip(CircleShape).clickable(enabled = inputText.isNotBlank() && !isThinking) {
+                        Box(modifier = Modifier.size(52.dp).clip(CircleShape).background(if (inputText.isBlank()) Slate300 else Indigo600).shadow(8.dp, CircleShape).clip(CircleShape).clickable(enabled = inputText.isNotBlank() && !isThinking) {
                             if (inputText.isNotBlank()) {
                                 if (isOfflineMode) {
                                     // آفلاین

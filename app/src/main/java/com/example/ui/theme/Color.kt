@@ -30,21 +30,25 @@ val Slate50 = Color(0xFFF8FAFC)
 // Semantic Accents
 val Emerald600 = Color(0xFF059669)
 val Emerald500 = Color(0xFF10B981)
+val Emerald300 = Color(0xFF6EE7B7)
 val Emerald50 = Color(0xFFECFDF5)
 val Emerald100 = Color(0xFFD1FAE5)
 
 val Amber600 = Color(0xFFD97706)
 val Amber500 = Color(0xFFF59E0B)
+val Amber300 = Color(0xFFFCD34D)
 val Amber50 = Color(0xFFFFFBEB)
 val Amber100 = Color(0xFFFEF3C7)
 
 val Rose600 = Color(0xFFE11D48)
 val Rose500 = Color(0xFFF43F5E)
+val Rose300 = Color(0xFFFB7185)
 val Rose50 = Color(0xFFFFF1F2)
 val Rose100 = Color(0xFFFFE4E6)
 
 val Sky600 = Color(0xFF0284C7)
 val Sky500 = Color(0xFF0EA5E9)
+val Sky300 = Color(0xFF7DD3FC)
 val Sky50 = Color(0xFFF0F9FF)
 val Sky100 = Color(0xFFE0F2FE)
 
