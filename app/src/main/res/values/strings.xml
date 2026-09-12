@@ -1,3 +1,9 @@
 <resources>
-    <string name="app_name">میلانو لگال</string>
+    <string name="app_name">میلانو لگال - نسخه لاکچری</string>
+    <string name="app_subtitle">سامانه هوشمند حقوقی بی‌رقیب</string>
+    <string name="ai_assistant_name">دستیار هوشمند میلانو AI</string>
+    <string name="ai_welcome">سلام! من وکیل هوشمند شما هستم. بر اساس قوانین رسمی ایران پاسخ می‌دهم و با صدای فارسی صحبت می‌کنم.</string>
+    <string name="luxury_edition">نسخه لاکچری ۲۰۲۶ - تحلیل قوانین رسمی ایران</string>
+    <string name="persian_tts">پخش صوتی فارسی فعال</string>
+    <string name="legal_basis">مستند به قوانین رسمی جمهوری اسلامی ایران</string>
 </resources>

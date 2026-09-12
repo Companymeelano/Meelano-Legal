@@ -5,6 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.example.data.model.AiChatMessage
 import com.example.data.model.EblaghItem
 import com.example.data.model.JudicialDeadline
 import com.example.data.model.LegalCase
@@ -18,9 +19,10 @@ import kotlinx.coroutines.launch
         LegalCase::class,
         JudicialDeadline::class,
         EblaghItem::class,
-        LegalDraft::class
+        LegalDraft::class,
+        AiChatMessage::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -28,6 +30,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun judicialDeadlineDao(): JudicialDeadlineDao
     abstract fun eblaghDao(): EblaghDao
     abstract fun legalDraftDao(): LegalDraftDao
+    abstract fun aiChatDao(): AiChatDao
 
     companion object {
         @Volatile
@@ -38,9 +41,10 @@ abstract class AppDatabase : RoomDatabase() {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
-                    "meelanoe_legal_local.db"
+                    "meelanoe_legal_luxury.db"
                 )
                 .addCallback(DatabaseCallback(scope))
+                .fallbackToDestructiveMigration()
                 .build()
                 INSTANCE = instance
                 instance
@@ -65,6 +69,7 @@ abstract class AppDatabase : RoomDatabase() {
             val deadlineDao = database.judicialDeadlineDao()
             val eblaghDao = database.eblaghDao()
             val draftDao = database.legalDraftDao()
+            val chatDao = database.aiChatDao()
 
             val cases = listOf(
                 LegalCase(
@@ -105,6 +110,19 @@ abstract class AppDatabase : RoomDatabase() {
                     priority = "فوری",
                     summary = "حیف و میل وجوه سرمایه‌گذاری ملکی و ارائه اسناد غیرواقعی به ارزش ۸۰ میلیارد ریال.",
                     defenseStrategy = "استناد به ماده ۱ قانون تشدید مجازات مرتکبین ارتشاء، اختلاس و کلاهبرداری و ماده ۶۷۴ قانون مجازات اسلامی (تعزیرات)."
+                ),
+                LegalCase(
+                    caseNumber = "۱۴۰۳۰۵۰۰۰۹۱۲۳۴",
+                    archiveClassNumber = "۰۴۰۰۱۲۳",
+                    courtBranch = "شعبه ۵ دادگاه خانواده مجتمع قضایی امام خمینی تهران",
+                    caseTitle = "مطالبه مهریه و نفقه معوقه به نرخ روز",
+                    clientName = "خانم سارا احمدی",
+                    clientRole = "خواهان",
+                    oppositeParty = "آقای محمدرضا کریمی",
+                    caseStatus = "در جریان رسیدگی",
+                    priority = "عادی",
+                    summary = "مطالبه ۱۱۴ سکه تمام بهار آزادی مهریه و نفقه معوقه ۲ ساله با استناد به عقدنامه رسمی.",
+                    defenseStrategy = "استناد به مواد ۱۰۸۲ و ۱۱۰۶ قانون مدنی و ماده ۲۹ قانون حمایت خانواده مصوب ۱۳۹۱."
                 )
             )
             caseDao.insertCases(cases)
@@ -197,6 +215,16 @@ abstract class AppDatabase : RoomDatabase() {
                 )
             )
             draftDao.insertDrafts(drafts)
+
+            val welcomeChats = listOf(
+                AiChatMessage(
+                    role = "assistant",
+                    content = "سلام! من دستیار حقوقی هوشمند میلانو لگال هستم 👨‍⚖️\n\nبر اساس قوانین رسمی جمهوری اسلامی ایران به شما مشاوره می‌دهم:\n\n✓ قانون مدنی و تجارت\n✓ آیین دادرسی مدنی و کیفری\n✓ قانون مجازات اسلامی\n✓ قانون چک و خانواده\n\nسوال حقوقی خود را بپرسید، با صدای فارسی پاسخ می‌دهم و متن را می‌خوانم.\n\nمثال: \"مهلت تجدیدنظرخواهی چقدر است؟\" یا \"برای مطالبه چک چه کنم؟\"",
+                    legalCategory = "عمومی",
+                    relatedLawArticles = "ماده ۱۰ قانون مدنی، ماده ۳۳۶ ق.آ.د.م"
+                )
+            )
+            chatDao.insertMessages(welcomeChats)
         }
     }
 }

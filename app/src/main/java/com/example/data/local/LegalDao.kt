@@ -1,11 +1,11 @@
 package com.example.data.local
 
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import com.example.data.model.AiChatMessage
 import com.example.data.model.EblaghItem
 import com.example.data.model.JudicialDeadline
 import com.example.data.model.LegalCase
@@ -91,4 +91,34 @@ interface LegalDraftDao {
 
     @Query("DELETE FROM legal_drafts WHERE id = :id")
     suspend fun deleteDraftById(id: Long)
+}
+
+@Dao
+interface AiChatDao {
+    @Query("SELECT * FROM ai_chat_messages ORDER BY timestamp ASC")
+    fun getAllMessages(): Flow<List<AiChatMessage>>
+
+    @Query("SELECT * FROM ai_chat_messages ORDER BY timestamp DESC LIMIT 50")
+    fun getRecentMessages(): Flow<List<AiChatMessage>>
+
+    @Query("SELECT * FROM ai_chat_messages WHERE legalCategory = :category ORDER BY timestamp ASC")
+    fun getMessagesByCategory(category: String): Flow<List<AiChatMessage>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertMessage(message: AiChatMessage): Long
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertMessages(messages: List<AiChatMessage>)
+
+    @Query("DELETE FROM ai_chat_messages")
+    suspend fun clearAllMessages()
+
+    @Query("DELETE FROM ai_chat_messages WHERE id = :id")
+    suspend fun deleteMessageById(id: Long)
+
+    @Update
+    suspend fun updateMessage(message: AiChatMessage)
+
+    @Query("SELECT COUNT(*) FROM ai_chat_messages")
+    suspend fun getMessageCount(): Int
 }

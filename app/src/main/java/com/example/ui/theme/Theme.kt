@@ -9,19 +9,19 @@ import androidx.compose.ui.graphics.Color
 
 private val DarkColorScheme =
   darkColorScheme(
-    primary = Color(0xFF818CF8), // Indigo 400
-    onPrimary = Slate900,
-    primaryContainer = Color(0xFF312E81), // Indigo 900
-    onPrimaryContainer = Color(0xFFE0E7FF), // Indigo 100
-    secondary = Emerald500,
+    primary = LuxuryGold,
+    onPrimary = LuxuryNavy,
+    primaryContainer = Color(0xFF312E81),
+    onPrimaryContainer = Color(0xFFE0E7FF),
+    secondary = LuxuryEmerald,
     onSecondary = Slate900,
     secondaryContainer = Color(0xFF064E3B),
     onSecondaryContainer = Emerald100,
-    tertiary = Amber500,
-    onTertiary = Slate900,
+    tertiary = LuxuryGold,
+    onTertiary = LuxuryNavy,
     tertiaryContainer = Color(0xFF78350F),
     onTertiaryContainer = Amber100,
-    background = Slate900,
+    background = LuxuryNavy,
     onBackground = Color(0xFFF8FAFC),
     surface = Slate800,
     onSurface = Color(0xFFF8FAFC),
@@ -45,7 +45,7 @@ private val LightColorScheme =
     onSecondary = Color.White,
     secondaryContainer = Emerald50,
     onSecondaryContainer = Color(0xFF065F46),
-    tertiary = Amber600,
+    tertiary = LuxuryGoldDark,
     onTertiary = Color.White,
     tertiaryContainer = Amber50,
     onTertiaryContainer = Color(0xFF92400E),
@@ -66,10 +66,9 @@ private val LightColorScheme =
 @Composable
 fun MyApplicationTheme(
   darkTheme: Boolean = isSystemInDarkTheme(),
-  dynamicColor: Boolean = false, // Keep consistent Iranian Legal identity
+  dynamicColor: Boolean = false,
   content: @Composable () -> Unit,
 ) {
   val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
   MaterialTheme(colorScheme = colorScheme, typography = Typography, content = content)
 }
-
