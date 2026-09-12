@@ -31,12 +31,23 @@ jobs:
         with:
           gradle-version: 9.3.1
 
-      - name: Create files
+      - name: Create files and fix duplicates
         run: |
           echo "sdk.dir=$ANDROID_HOME" > local.properties
           echo '{"project_info":{"project_number":"000","project_id":"meelano-legal-luxury","storage_bucket":"dummy.appspot.com"},"client":[{"client_info":{"mobilesdk_app_id":"1:000:android:000","android_client_info":{"package_name":"com.aistudio.meelanolegal.law"}},"oauth_client":[],"api_key":[{"current_key":"dummy"}],"services":{"appinvite_service":{"other_platform_oauth_client":[]}}}],"configuration_version":"1"}' > app/google-services.json
           keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US" || true
           cp debug.keystore app/debug.keystore || true
+          # Fix duplicate resources: remove webp if both png and webp exist
+          echo "Checking for duplicate launcher icons..."
+          find app/src/main/res -name "*.webp" -type f | while read f; do
+            png="${f%.webp}.png"
+            if [ -f "$png" ]; then
+              echo "Removing duplicate webp $f (png exists $png)"
+              rm -f "$f"
+            fi
+          done
+          echo "Remaining launcher files:"
+          find app/src/main/res -name "ic_launcher*" | sort
 
       - name: Build Debug APK with full error capture
         id: build
@@ -52,29 +63,31 @@ jobs:
           find . -name "*.apk" -type f 2>/dev/null | tee -a build.log || true
           ls -R app/build/outputs/ 2>/dev/null | head -n 300 | tee -a build.log || true
           
-          # Create detailed error file
-          echo "=== BUILD LOG SUMMARY ===" > ci-error.log
-          echo "EXIT_CODE=$EXIT_CODE" >> ci-error.log
-          echo "RUN_ID=${{ github.run_id }}" >> ci-error.log
-          echo "SHA=${{ github.sha }}" >> ci-error.log
-          echo "" >> ci-error.log
-          echo "=== ERRORS ===" >> ci-error.log
-          grep -i -E "e: |error:|FAILURE|Unresolved|does not exist|not found|Execution failed|FAILED" build.log | head -n 600 >> ci-error.log || true
-          echo "" >> ci-error.log
-          echo "=== LAST 1000 LINES ===" >> ci-error.log
-          tail -n 1000 build.log >> ci-error.log
+          # Create detailed error file - always
+          {
+            echo "=== BUILD LOG SUMMARY ==="
+            echo "EXIT_CODE=$EXIT_CODE"
+            echo "RUN_ID=${{ github.run_id }}"
+            echo "SHA=${{ github.sha }}"
+            echo ""
+            echo "=== ERRORS ==="
+            grep -i -E "e: |error:|FAILURE|Unresolved|does not exist|not found|Execution failed|FAILED|Duplicate resources" build.log | head -n 600 || true
+            echo ""
+            echo "=== LAST 1000 LINES ==="
+            tail -n 1000 build.log || true
+          } > ci-error.log 2>&1
           
-          # Truncated for issue (max 50k)
-          head -c 45000 ci-error.log > ci-error-issue.log
+          # Truncated for issue (max 45k)
+          head -c 45000 ci-error.log > ci-error-issue.log 2>&1 || cp ci-error.log ci-error-issue.log || echo "No log" > ci-error-issue.log
           echo "" >> ci-error-issue.log
-          echo "--- truncated ---" >> ci-error-issue.log
+          echo "--- truncated --- Run ${{ github.run_id }} ---" >> ci-error-issue.log
           
           if [ $EXIT_CODE -ne 0 ]; then
             echo "## ❌ Build Failed - Error Analysis" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "### Compilation errors:" >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
-            grep -i -E "e: |error:|FAILURE|Unresolved|does not exist|not found" build.log | head -n 300 >> $GITHUB_STEP_SUMMARY || echo "No pattern" >> $GITHUB_STEP_SUMMARY
+            grep -i -E "e: |error:|FAILURE|Unresolved|does not exist|not found|Duplicate resources" build.log | head -n 300 >> $GITHUB_STEP_SUMMARY || echo "No pattern" >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "### Last 500 lines:" >> $GITHUB_STEP_SUMMARY
@@ -83,7 +96,10 @@ jobs:
             echo '```' >> $GITHUB_STEP_SUMMARY
           else
             echo "## ✅ Build Succeeded" >> $GITHUB_STEP_SUMMARY
-            find . -name "*.apk" -type f >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "APK files:" >> $GITHUB_STEP_SUMMARY
+            find . -name "*.apk" -type f >> $GITHUB_STEP_SUMMARY || true
+            ls -lh app/build/outputs/apk/debug/ >> $GITHUB_STEP_SUMMARY || true
           fi
           
           exit $EXIT_CODE
@@ -128,14 +144,17 @@ jobs:
             let log = '';
             try {
               log = fs.readFileSync('ci-error-issue.log', 'utf8');
+              console.log('Read ci-error-issue.log', log.length);
             } catch (e) {
-              log = 'Failed to read log: ' + e.message;
+              console.log('Failed to read ci-error-issue.log:', e.message);
               try {
                 const full = fs.readFileSync('build.log', 'utf8');
-                log += '\n\n--- build.log tail ---\n' + full.slice(-20000);
-              } catch (e2) {}
+                log = full.slice(-45000);
+                console.log('Read build.log tail', log.length);
+              } catch (e2) {
+                log = 'Failed to read logs: ' + e.message + ' ' + e2.message;
+              }
             }
-            // Truncate to 60000 chars max for issue body
             if (log.length > 60000) log = log.slice(0, 60000) + '\n... truncated ...';
             
             try {
@@ -143,48 +162,19 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 title: `Build failed run ${{ github.run_id }} - ${{ github.sha }}`.slice(0, 200),
-                body: log || 'No log available',
+                body: log || 'No log available - check Actions summary',
               });
               console.log('Created issue', issue.data.number);
             } catch (e) {
               console.log('Failed to create issue:', e.message);
-              // Try creating with simple body
               try {
                 await github.rest.issues.create({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   title: `Build failed ${{ github.run_id }}`,
-                  body: `Run ${{ github.run_id }} failed. See summary. Error: ${e.message}\n\nLog snippet:\n\`\`\`\n${log.slice(0, 10000)}\n\`\`\``,
+                  body: `Run ${{ github.run_id }} failed. SHA ${{ github.sha }}. See Actions summary.\n\nError: ${e.message}\n\nLog snippet:\n\`\`\`\n${log.slice(0, 20000)}\n\`\`\``,
                 });
               } catch (e2) {
                 console.log('Second attempt failed:', e2.message);
               }
-            }
-            
-            // Also try to upload file via contents API
-            try {
-              const content = fs.readFileSync('ci-error.log', {encoding: 'base64'});
-              const path = `ci-logs/run-${{ github.run_id }}.log`;
-              // Check if exists
-              let sha = undefined;
-              try {
-                const existing = await github.rest.repos.getContent({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  path: path,
-                });
-                if (!Array.isArray(existing.data)) sha = existing.data.sha;
-              } catch (e) {}
-              
-              await github.rest.repos.createOrUpdateFileContents({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                path: path,
-                message: `ci: add log for run ${{ github.run_id }} [skip ci]`,
-                content: content,
-                sha: sha,
-              });
-              console.log('Uploaded log via contents API to', path);
-            } catch (e) {
-              console.log('Failed to upload via contents API:', e.message);
             }
