@@ -56,24 +56,25 @@ jobs:
           echo "=== BUILD LOG SUMMARY ===" > ci-error.log
           echo "EXIT_CODE=$EXIT_CODE" >> ci-error.log
           echo "RUN_ID=${{ github.run_id }}" >> ci-error.log
+          echo "SHA=${{ github.sha }}" >> ci-error.log
           echo "" >> ci-error.log
           echo "=== ERRORS ===" >> ci-error.log
-          grep -i -E "e: |error:|FAILURE|Unresolved|does not exist|not found|Execution failed" build.log | head -n 300 >> ci-error.log || true
+          grep -i -E "e: |error:|FAILURE|Unresolved|does not exist|not found|Execution failed" build.log | head -n 400 >> ci-error.log || true
           echo "" >> ci-error.log
-          echo "=== LAST 500 LINES ===" >> ci-error.log
-          tail -n 500 build.log >> ci-error.log
+          echo "=== LAST 600 LINES ===" >> ci-error.log
+          tail -n 600 build.log >> ci-error.log
           
           if [ $EXIT_CODE -ne 0 ]; then
             echo "## ❌ Build Failed - Error Analysis" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "### Compilation errors:" >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
-            grep -i -E "e: |error:|FAILURE|Unresolved|does not exist|not found" build.log | head -n 150 >> $GITHUB_STEP_SUMMARY || echo "No pattern" >> $GITHUB_STEP_SUMMARY
+            grep -i -E "e: |error:|FAILURE|Unresolved|does not exist|not found" build.log | head -n 200 >> $GITHUB_STEP_SUMMARY || echo "No pattern" >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
-            echo "### Last 200 lines:" >> $GITHUB_STEP_SUMMARY
+            echo "### Last 300 lines:" >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
-            tail -n 200 build.log >> $GITHUB_STEP_SUMMARY
+            tail -n 300 build.log >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
           else
             echo "## ✅ Build Succeeded" >> $GITHUB_STEP_SUMMARY
@@ -87,8 +88,8 @@ jobs:
         run: |
           find . -name "*.apk" -type f 2>/dev/null | head -n 20
           ls -lh app/build/outputs/apk/debug/ 2>/dev/null || true
-          echo "--- ci-error.log head ---"
-          cat ci-error.log | head -n 300 || true
+          echo "--- ci-error.log head 400 ---"
+          head -n 400 ci-error.log || true
 
       - name: Upload APK
         if: always()
@@ -113,18 +114,24 @@ jobs:
             app/build/reports/
           if-no-files-found: warn
 
-      - name: Create GitHub Issue with error log on failure
+      - name: Create Gist with error log on failure
         if: failure()
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Truncate log to fit issue body limit (65536 chars)
-          head -c 50000 ci-error.log > ci-error-truncated.log
-          echo "" >> ci-error-truncated.log
-          echo "Full log available in artifacts, run ID ${{ github.run_id }}" >> ci-error-truncated.log
+          echo "Creating gist with error log..."
+          # Truncate to 1MB max for gist (gist limit is smaller but we try)
+          head -c 900000 ci-error.log > ci-error-gist.log || true
           
-          # Create issue using gh CLI
-          gh issue create --title "Build failed run ${{ github.run_id }} - ${{ github.sha }}" --body-file ci-error-truncated.log --label "bug" || echo "Issue creation failed"
+          # Use gh api to create gist
+          gh api gists --method POST \
+            -f description="Build error log run ${{ github.run_id }} sha ${{ github.sha }}" \
+            -f public=false \
+            -f files["ci-error-${{ github.run_id }}.log"].content="$(cat ci-error-gist.log | head -c 800000)" \
+            || echo "Gist creation failed"
           
-          # Also try to create comment on commit
-          gh api repos/${{ github.repository }}/commits/${{ github.sha }}/comments -f body="$(head -c 20000 ci-error.log)" || echo "Comment failed"
+          # Also create issue without label
+          gh issue create --title "Build failed ${{ github.run_id }}" --body-file ci-error-gist.log || echo "Issue creation failed, trying without body file"
+          
+          # Try simple issue
+          gh issue create --title "Build failed ${{ github.run_id }} - log in gist" --body "Run ${{ github.run_id }} failed, see gist and artifacts. SHA ${{ github.sha }}. Check Actions summary for errors." || echo "Simple issue failed"
