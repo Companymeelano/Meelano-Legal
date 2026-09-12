@@ -59,25 +59,27 @@ jobs:
           echo "SHA=${{ github.sha }}" >> ci-error.log
           echo "" >> ci-error.log
           echo "=== ERRORS ===" >> ci-error.log
-          grep -i -E "e: |error:|FAILURE|Unresolved|does not exist|not found|Execution failed|FAILED" build.log | head -n 500 >> ci-error.log || true
+          grep -i -E "e: |error:|FAILURE|Unresolved|does not exist|not found|Execution failed|FAILED" build.log | head -n 600 >> ci-error.log || true
           echo "" >> ci-error.log
-          echo "=== LAST 800 LINES ===" >> ci-error.log
-          tail -n 800 build.log >> ci-error.log
+          echo "=== LAST 1000 LINES ===" >> ci-error.log
+          tail -n 1000 build.log >> ci-error.log
           
           # Truncated for issue (max 50k)
-          head -c 50000 ci-error.log > ci-error-issue.log
+          head -c 45000 ci-error.log > ci-error-issue.log
+          echo "" >> ci-error-issue.log
+          echo "--- truncated ---" >> ci-error-issue.log
           
           if [ $EXIT_CODE -ne 0 ]; then
             echo "## ❌ Build Failed - Error Analysis" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "### Compilation errors:" >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
-            grep -i -E "e: |error:|FAILURE|Unresolved|does not exist|not found" build.log | head -n 250 >> $GITHUB_STEP_SUMMARY || echo "No pattern" >> $GITHUB_STEP_SUMMARY
+            grep -i -E "e: |error:|FAILURE|Unresolved|does not exist|not found" build.log | head -n 300 >> $GITHUB_STEP_SUMMARY || echo "No pattern" >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
-            echo "### Last 400 lines:" >> $GITHUB_STEP_SUMMARY
+            echo "### Last 500 lines:" >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
-            tail -n 400 build.log >> $GITHUB_STEP_SUMMARY
+            tail -n 500 build.log >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
           else
             echo "## ✅ Build Succeeded" >> $GITHUB_STEP_SUMMARY
@@ -91,8 +93,8 @@ jobs:
         run: |
           find . -name "*.apk" -type f 2>/dev/null | head -n 20
           ls -lh app/build/outputs/apk/debug/ 2>/dev/null || true
-          echo "--- ci-error.log head 500 ---"
-          head -n 500 ci-error.log || true
+          echo "--- ci-error.log head 600 ---"
+          head -n 600 ci-error.log || true
 
       - name: Upload APK
         if: always()
@@ -117,24 +119,72 @@ jobs:
             app/build/reports/
           if-no-files-found: warn
 
-      - name: Create Issue and upload log via contents API on failure
+      - name: Create Issue with error log via github-script
         if: failure()
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          echo "Creating issue with truncated log..."
-          cat ci-error-issue.log
-          
-          # Create issue
-          gh issue create --title "Build failed ${{ github.run_id }} - ${{ github.sha }}" --body-file ci-error-issue.log || echo "Issue create failed"
-          
-          # Upload via contents API to ci-logs folder
-          mkdir -p ci-logs || true
-          CONTENT=$(base64 -w 0 ci-error.log)
-          # Try to get existing file sha
-          SHA=$(gh api repos/${{ github.repository }}/contents/ci-logs/run-${{ github.run_id }}.log --jq '.sha' 2>/dev/null || echo "")
-          if [ -z "$SHA" ]; then
-            gh api repos/${{ github.repository }}/contents/ci-logs/run-${{ github.run_id }}.log --method PUT -f message="ci: add log for run ${{ github.run_id }} [skip ci]" -f content="$CONTENT" || echo "Content API put failed"
-          else
-            gh api repos/${{ github.repository }}/contents/ci-logs/run-${{ github.run_id }}.log --method PUT -f message="ci: update log for run ${{ github.run_id }} [skip ci]" -f content="$CONTENT" -f sha="$SHA" || echo "Content API update failed"
-          fi
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let log = '';
+            try {
+              log = fs.readFileSync('ci-error-issue.log', 'utf8');
+            } catch (e) {
+              log = 'Failed to read log: ' + e.message;
+              try {
+                const full = fs.readFileSync('build.log', 'utf8');
+                log += '\n\n--- build.log tail ---\n' + full.slice(-20000);
+              } catch (e2) {}
+            }
+            // Truncate to 60000 chars max for issue body
+            if (log.length > 60000) log = log.slice(0, 60000) + '\n... truncated ...';
+            
+            try {
+              const issue = await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `Build failed run ${{ github.run_id }} - ${{ github.sha }}`.slice(0, 200),
+                body: log || 'No log available',
+              });
+              console.log('Created issue', issue.data.number);
+            } catch (e) {
+              console.log('Failed to create issue:', e.message);
+              // Try creating with simple body
+              try {
+                await github.rest.issues.create({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  title: `Build failed ${{ github.run_id }}`,
+                  body: `Run ${{ github.run_id }} failed. See summary. Error: ${e.message}\n\nLog snippet:\n\`\`\`\n${log.slice(0, 10000)}\n\`\`\``,
+                });
+              } catch (e2) {
+                console.log('Second attempt failed:', e2.message);
+              }
+            }
+            
+            // Also try to upload file via contents API
+            try {
+              const content = fs.readFileSync('ci-error.log', {encoding: 'base64'});
+              const path = `ci-logs/run-${{ github.run_id }}.log`;
+              // Check if exists
+              let sha = undefined;
+              try {
+                const existing = await github.rest.repos.getContent({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  path: path,
+                });
+                if (!Array.isArray(existing.data)) sha = existing.data.sha;
+              } catch (e) {}
+              
+              await github.rest.repos.createOrUpdateFileContents({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                path: path,
+                message: `ci: add log for run ${{ github.run_id }} [skip ci]`,
+                content: content,
+                sha: sha,
+              });
+              console.log('Uploaded log via contents API to', path);
+            } catch (e) {
+              console.log('Failed to upload via contents API:', e.message);
+            }
