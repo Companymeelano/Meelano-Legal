@@ -61,7 +61,7 @@ fun AiAssistantScreen(
         if (messages.isNotEmpty()) listState.animateScrollToItem(messages.size - 1)
     }
 
-    Box(modifier = modifier.fillMaxSize().background(Slate50)) {
+    Box(modifier = modifier.fillMaxSize().background(LuxuryObsidianBrush)) {
         Column(modifier = Modifier.fillMaxSize()) {
             // Luxury Header - بخش ۱،۲،۴
             Card(

@@ -65,7 +65,7 @@ private val LightColorScheme =
 
 @Composable
 fun MyApplicationTheme(
-  darkTheme: Boolean = isSystemInDarkTheme(),
+  darkTheme: Boolean = true, // همیشه تیره لاکچری - درخواست کاربر
   dynamicColor: Boolean = false,
   content: @Composable () -> Unit,
 ) {
