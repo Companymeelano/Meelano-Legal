@@ -1,0 +1,50 @@
+name: Build Meelano Legal Luxury APK
+
+on:
+  push:
+    branches: [ "arena/01a095aa-meelano-legal", "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Create local.properties
+        run: echo "sdk.dir=$ANDROID_HOME" > local.properties
+
+      - name: Create dummy google-services.json (replace with real)
+        run: |
+          echo '{"project_info":{"project_number":"000","project_id":"meelano-legal-luxury","storage_bucket":"dummy.appspot.com"},"client":[{"client_info":{"mobilesdk_app_id":"1:000:android:000","android_client_info":{"package_name":"com.aistudio.meelanolegal.law"}},"oauth_client":[],"api_key":[{"current_key":"dummy"}],"services":{"appinvite_service":{"other_platform_oauth_client":[]}}}],"configuration_version":"1"}' > app/google-services.json || true
+
+      - name: Build Debug APK - Luxury Edition
+        run: ./gradlew assembleDebug --stacktrace
+
+      - name: Build Release APK (unsigned)
+        run: ./gradlew assembleRelease --stacktrace
+
+      - name: Upload Debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Meelano-Legal-Luxury-Debug-APK
+          path: app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Upload Release APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Meelano-Legal-Luxury-Release-APK
+          path: app/build/outputs/apk/release/app-release-unsigned.apk
