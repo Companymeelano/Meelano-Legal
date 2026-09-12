@@ -25,6 +25,7 @@ import com.example.data.model.LegalCase
 import com.example.data.service.PredictionService
 import com.example.ui.LegalViewModel
 import com.example.ui.theme.*
+import kotlinx.coroutines.launch
 
 @Composable
 fun DashboardScreen(
