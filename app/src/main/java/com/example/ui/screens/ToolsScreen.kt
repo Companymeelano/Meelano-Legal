@@ -197,11 +197,11 @@ fun ToolsScreen(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(modifier = Modifier.width(30.dp, 1.dp).background(UniformGold.copy(alpha = 0.3f)))
+                Box(modifier = Modifier.size(30.dp, 1.dp).background(UniformGold.copy(alpha = 0.3f)))
                 Spacer(modifier = Modifier.width(12.dp))
                 Text("میلانو لگال • تم یکدست تیره طلایی", fontSize = 10.sp, color = Color.White.copy(alpha = 0.4f))
                 Spacer(modifier = Modifier.width(12.dp))
-                Box(modifier = Modifier.width(30.dp, 1.dp).background(UniformGold.copy(alpha = 0.3f)))
+                Box(modifier = Modifier.size(30.dp, 1.dp).background(UniformGold.copy(alpha = 0.3f)))
             }
             Spacer(modifier = Modifier.height(20.dp))
         }
