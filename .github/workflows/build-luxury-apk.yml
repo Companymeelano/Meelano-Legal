@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  issues: write
 
 jobs:
   build:
@@ -51,49 +52,43 @@ jobs:
           find . -name "*.apk" -type f 2>/dev/null | tee -a build.log || true
           ls -R app/build/outputs/ 2>/dev/null | head -n 300 | tee -a build.log || true
           
+          # Create detailed error file
+          echo "=== BUILD LOG SUMMARY ===" > ci-error.log
+          echo "EXIT_CODE=$EXIT_CODE" >> ci-error.log
+          echo "RUN_ID=${{ github.run_id }}" >> ci-error.log
+          echo "" >> ci-error.log
+          echo "=== ERRORS ===" >> ci-error.log
+          grep -i -E "e: |error:|FAILURE|Unresolved|does not exist|not found|Execution failed" build.log | head -n 300 >> ci-error.log || true
+          echo "" >> ci-error.log
+          echo "=== LAST 500 LINES ===" >> ci-error.log
+          tail -n 500 build.log >> ci-error.log
+          
           if [ $EXIT_CODE -ne 0 ]; then
             echo "## ❌ Build Failed - Error Analysis" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
-            echo "### Last 100 lines of build.log:" >> $GITHUB_STEP_SUMMARY
+            echo "### Compilation errors:" >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
-            tail -n 100 build.log >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "### Compilation errors (e: or error:):" >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
-            grep -i -E "e: |error:|FAILURE|Unresolved reference|unresolved|does not exist" build.log | head -n 100 >> $GITHUB_STEP_SUMMARY || echo "No specific error pattern found" >> $GITHUB_STEP_SUMMARY
+            grep -i -E "e: |error:|FAILURE|Unresolved|does not exist|not found" build.log | head -n 150 >> $GITHUB_STEP_SUMMARY || echo "No pattern" >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
-            echo "### Full log tail 300:" >> $GITHUB_STEP_SUMMARY
+            echo "### Last 200 lines:" >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
-            tail -n 300 build.log >> $GITHUB_STEP_SUMMARY
+            tail -n 200 build.log >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
           else
             echo "## ✅ Build Succeeded" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "APK found:" >> $GITHUB_STEP_SUMMARY
             find . -name "*.apk" -type f >> $GITHUB_STEP_SUMMARY
           fi
-          
-          # Always create error file for debugging
-          echo "=== BUILD LOG SUMMARY ===" > ci-error.log
-          echo "EXIT_CODE=$EXIT_CODE" >> ci-error.log
-          echo "" >> ci-error.log
-          echo "=== ERRORS ===" >> ci-error.log
-          grep -i -E "e: |error:|FAILURE|Unresolved|does not exist|not found" build.log | head -n 200 >> ci-error.log || true
-          echo "" >> ci-error.log
-          echo "=== LAST 400 LINES ===" >> ci-error.log
-          tail -n 400 build.log >> ci-error.log
           
           exit $EXIT_CODE
 
       - name: List APK outputs
         if: always()
         run: |
-          echo "Searching APKs..."
           find . -name "*.apk" -type f 2>/dev/null | head -n 20
           ls -lh app/build/outputs/apk/debug/ 2>/dev/null || true
-          cat ci-error.log | head -n 200 || true
+          echo "--- ci-error.log head ---"
+          cat ci-error.log | head -n 300 || true
 
       - name: Upload APK
         if: always()
@@ -118,16 +113,18 @@ jobs:
             app/build/reports/
           if-no-files-found: warn
 
-      - name: Push error log to branch for debugging [skip ci]
+      - name: Create GitHub Issue with error log on failure
         if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add ci-error.log build.log || true
-          # Only commit if there are changes
-          if git diff --cached --quiet; then
-            echo "No changes to commit"
-          else
-            git commit -m "ci: add build error log for debugging [skip ci]"
-            git push origin HEAD:arena/01a095aa-meelano-legal || echo "Push failed, trying force"
-          fi
+          # Truncate log to fit issue body limit (65536 chars)
+          head -c 50000 ci-error.log > ci-error-truncated.log
+          echo "" >> ci-error-truncated.log
+          echo "Full log available in artifacts, run ID ${{ github.run_id }}" >> ci-error-truncated.log
+          
+          # Create issue using gh CLI
+          gh issue create --title "Build failed run ${{ github.run_id }} - ${{ github.sha }}" --body-file ci-error-truncated.log --label "bug" || echo "Issue creation failed"
+          
+          # Also try to create comment on commit
+          gh api repos/${{ github.repository }}/commits/${{ github.sha }}/comments -f body="$(head -c 20000 ci-error.log)" || echo "Comment failed"
