@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
@@ -17,10 +18,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -32,6 +31,17 @@ import com.example.data.service.VoiceRecognitionManager
 import com.example.ui.LegalViewModel
 import com.example.ui.theme.*
 import kotlinx.coroutines.launch
+
+// تم یکدست سبز تیره لاکچری - هماهنگ با پرونده‌ها و Tools
+private val Bg = LuxuryGreenDeep
+private val CardBg = LuxuryGreenDark
+private val CardElev = LuxuryGreenMedium
+private val CardElev2 = LuxuryGreenLight
+private val Gold = LuxuryGreenGold
+private val GoldLight = LuxuryGreenGoldLight
+private val GoldBrush = LuxuryGreenGoldBrush
+private val Border = LuxuryGreenBorder
+private val BorderStrong = LuxuryGreenBorderStrong
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,150 +66,159 @@ fun AiAssistantScreen(
     val scope = rememberCoroutineScope()
 
     val categories = listOf("همه", "حقوقی", "کیفری", "خانواده", "مواعد قضایی")
+    val suggestions = listOf("مهلت تجدیدنظر؟", "چک برگشتی", "مهریه", "پیش‌بینی رای", "قرارداد", "طلاق")
 
     LaunchedEffect(messages.size) {
         if (messages.isNotEmpty()) listState.animateScrollToItem(messages.size - 1)
     }
 
-    Box(modifier = modifier.fillMaxSize().background(LuxuryObsidianBrush)) {
+    Box(modifier = modifier.fillMaxSize().background(Bg)) {
         Column(modifier = Modifier.fillMaxSize()) {
-            // Luxury Header - بخش ۱،۲،۴
+            // هدر لاکچری سبز طلایی - منظم و جذاب
             Card(
-                modifier = Modifier.fillMaxWidth().shadow(12.dp, RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp)),
-                shape = RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp),
-                colors = CardDefaults.cardColors(containerColor = LuxuryNavy),
-                elevation = CardDefaults.cardElevation(12.dp)
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp),
+                colors = CardDefaults.cardColors(containerColor = CardBg),
+                border = BorderStroke(0.5.dp, Border)
             ) {
-                Box(modifier = Modifier.fillMaxWidth().background(LuxuryNavyBrush).padding(20.dp)) {
-                    Column {
-                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                            Box(modifier = Modifier.size(56.dp).clip(CircleShape).background(LuxuryGoldBrush).shadow(8.dp, CircleShape), contentAlignment = Alignment.Center) {
-                                Icon(Icons.Default.SmartToy, contentDescription = null, tint = LuxuryNavy, modifier = Modifier.size(32.dp))
-                            }
-                            Spacer(modifier = Modifier.width(14.dp))
-                            Column(modifier = Modifier.weight(1f)) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text("دستیار هوشمند میلانو", fontSize = 18.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Surface(shape = RoundedCornerShape(6.dp), color = LuxuryGold.copy(alpha = 0.2f), border = BorderStroke(1.dp, LuxuryGold.copy(alpha = 0.5f))) {
-                                        Text(if (isOfflineMode) "OFFLINE AI" else "LUXURY AI", fontSize = 9.sp, fontWeight = FontWeight.Bold, color = LuxuryGold, modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp))
-                                    }
-                                }
-                                Text("STT فارسی • TTS فارسی • آفلاین Gemma 2B • ۵ صدای وکیل", fontSize = 10.sp, color = Slate300, lineHeight = 13.sp)
-                                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 4.dp)) {
-                                    Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(if (isOfflineMode) Amber500 else Emerald500))
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text(if (isOfflineMode) "حالت آفلاین Gemma 2B فعال - بدون اینترنت" else "آنلاین • تحلیل قوانین • صدای ${selectedVoiceProfile.name}", fontSize = 10.sp, color = if (isOfflineMode) Amber100 else Emerald100)
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                        Box(
+                            modifier = Modifier.size(48.dp).clip(CircleShape).background(GoldBrush).shadow(8.dp, CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(Icons.Default.SmartToy, contentDescription = null, tint = Bg, modifier = Modifier.size(26.dp))
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text("دستیار هوشمند میلانو", fontSize = 15.sp, fontWeight = FontWeight.ExtraBold, color = Color.White)
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Surface(shape = RoundedCornerShape(6.dp), color = Gold.copy(alpha = 0.15f), border = BorderStroke(0.5.dp, Gold.copy(alpha = 0.3f))) {
+                                    Text(if (isOfflineMode) "OFFLINE AI" else "LUXURY AI", fontSize = 8.sp, fontWeight = FontWeight.Bold, color = Gold, modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp))
                                 }
                             }
-                            IconButton(onClick = { viewModel.clearChatHistory() }, modifier = Modifier.size(36.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.1f))) {
-                                Icon(Icons.Default.DeleteSweep, contentDescription = "پاک", tint = Color.White, modifier = Modifier.size(18.dp))
+                            Text("STT فارسی • TTS فارسی • آفلاین Gemma 2B • ${selectedVoiceProfile.name}", fontSize = 9.sp, color = Color.White.copy(alpha = 0.6f), lineHeight = 12.sp)
+                            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 4.dp)) {
+                                Box(modifier = Modifier.size(6.dp).clip(CircleShape).background(if (isOfflineMode) Gold else Color(0xFF10B981)))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(if (isOfflineMode) "آفلاین Gemma 2B فعال" else "آنلاین • تحلیل قوانین ایران", fontSize = 9.sp, color = if (isOfflineMode) GoldLight else Color.White.copy(alpha = 0.5f))
                             }
                         }
-
-                        Spacer(modifier = Modifier.height(14.dp))
-
-                        // بخش ۱: STT + بخش ۲: آفلاین + بخش ۴: صدا
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            // STT Button
-                            Surface(
-                                shape = RoundedCornerShape(12.dp),
-                                color = if (isListening) Rose500 else Color.White.copy(alpha = 0.15f),
-                                border = BorderStroke(1.dp, if (isListening) Rose500 else Color.White.copy(alpha = 0.2f)),
-                                modifier = Modifier.weight(1f).clickable {
-                                    if (isListening) {
-                                        voiceManager.stopListening()
-                                        isListening = false
-                                    } else {
-                                        isListening = true
-                                        voiceManager.startListeningPersian { text ->
-                                            inputText = text
-                                            isListening = false
-                                        }
-                                    }
-                                }
-                            ) {
-                                Row(modifier = Modifier.padding(10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
-                                    Icon(if (isListening) Icons.Default.Stop else Icons.Default.Mic, contentDescription = null, tint = Color.White, modifier = Modifier.size(16.dp))
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text(if (isListening) "توقف" else "صحبت فارسی", fontSize = 11.sp, color = Color.White, fontWeight = FontWeight.Bold)
-                                }
-                            }
-
-                            // Offline Toggle
-                            Surface(
-                                shape = RoundedCornerShape(12.dp),
-                                color = if (isOfflineMode) LuxuryGold else Color.White.copy(alpha = 0.15f),
-                                border = BorderStroke(1.dp, if (isOfflineMode) LuxuryGold else Color.White.copy(alpha = 0.2f)),
-                                modifier = Modifier.weight(1f).clickable { isOfflineMode = !isOfflineMode }
-                            ) {
-                                Row(modifier = Modifier.padding(10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
-                                    Icon(if (isOfflineMode) Icons.Default.CloudOff else Icons.Default.Cloud, contentDescription = null, tint = if (isOfflineMode) LuxuryNavy else Color.White, modifier = Modifier.size(16.dp))
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text(if (isOfflineMode) "آفلاین" else "آنلاین", fontSize = 11.sp, color = if (isOfflineMode) LuxuryNavy else Color.White, fontWeight = FontWeight.Bold)
-                                }
-                            }
-
-                            // Voice Profile
-                            Surface(
-                                shape = RoundedCornerShape(12.dp),
-                                color = Color.White.copy(alpha = 0.15f),
-                                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.2f)),
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                Row(modifier = Modifier.padding(10.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
-                                    Icon(Icons.Default.RecordVoiceOver, contentDescription = null, tint = LuxuryGold, modifier = Modifier.size(16.dp))
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text(selectedVoiceProfile.tone, fontSize = 11.sp, color = Color.White, fontWeight = FontWeight.Bold)
-                                }
+                        Surface(shape = CircleShape, color = CardElev, border = BorderStroke(0.5.dp, Border)) {
+                            IconButton(onClick = { viewModel.clearChatHistory() }, modifier = Modifier.size(36.dp)) {
+                                Icon(Icons.Default.DeleteSweep, contentDescription = null, tint = Color.White.copy(alpha = 0.6f), modifier = Modifier.size(18.dp))
                             }
                         }
+                    }
 
-                        if (partialText.isNotBlank()) {
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Surface(shape = RoundedCornerShape(8.dp), color = Color.White.copy(alpha = 0.1f)) {
-                                Text(partialText, fontSize = 11.sp, color = Color.White, modifier = Modifier.padding(8.dp))
+                    Spacer(modifier = Modifier.height(14.dp))
+
+                    // 3 دکمه لاکچری طلایی - بسیار جذاب و منظم
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        // STT
+                        Card(
+                            shape = RoundedCornerShape(12.dp),
+                            colors = CardDefaults.cardColors(containerColor = if (isListening) Gold else CardElev),
+                            border = BorderStroke(1.dp, if (isListening) Gold else Border),
+                            modifier = Modifier.weight(1f).clickable {
+                                if (isListening) { voiceManager.stopListening(); isListening = false }
+                                else {
+                                    isListening = true
+                                    voiceManager.startListeningPersian { text -> inputText = text; isListening = false }
+                                }
+                            }
+                        ) {
+                            Row(modifier = Modifier.padding(10.dp).fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+                                Icon(if (isListening) Icons.Default.Stop else Icons.Default.Mic, contentDescription = null, tint = if (isListening) Bg else Gold, modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(if (isListening) "توقف" else "صحبت", fontSize = 11.sp, color = if (isListening) Bg else Color.White, fontWeight = FontWeight.Bold)
                             }
                         }
+                        // Offline
+                        Card(
+                            shape = RoundedCornerShape(12.dp),
+                            colors = CardDefaults.cardColors(containerColor = if (isOfflineMode) Gold else CardElev),
+                            border = BorderStroke(1.dp, if (isOfflineMode) Gold else Border),
+                            modifier = Modifier.weight(1f).clickable { isOfflineMode = !isOfflineMode }
+                        ) {
+                            Row(modifier = Modifier.padding(10.dp).fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+                                Icon(if (isOfflineMode) Icons.Default.CloudOff else Icons.Default.Cloud, contentDescription = null, tint = if (isOfflineMode) Bg else Gold, modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(if (isOfflineMode) "آفلاین" else "آنلاین", fontSize = 11.sp, color = if (isOfflineMode) Bg else Color.White, fontWeight = FontWeight.Bold)
+                            }
+                        }
+                        // Voice
+                        Card(
+                            shape = RoundedCornerShape(12.dp),
+                            colors = CardDefaults.cardColors(containerColor = CardElev),
+                            border = BorderStroke(1.dp, Border),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Row(modifier = Modifier.padding(10.dp).fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+                                Icon(Icons.Default.RecordVoiceOver, contentDescription = null, tint = Gold, modifier = Modifier.size(16.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(selectedVoiceProfile.tone, fontSize = 11.sp, color = Color.White, fontWeight = FontWeight.Bold, maxLines = 1)
+                            }
+                        }
+                    }
 
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                            categories.take(4).forEach { cat ->
-                                FilterChip(
-                                    selected = selectedCategory == cat,
-                                    onClick = { selectedCategory = cat },
-                                    label = { Text(cat, fontSize = 11.sp) },
-                                    shape = RoundedCornerShape(10.dp),
-                                    colors = FilterChipDefaults.filterChipColors(
-                                        selectedContainerColor = LuxuryGold,
-                                        selectedLabelColor = LuxuryNavy,
-                                        containerColor = Color.White.copy(alpha = 0.1f),
-                                        labelColor = Color.White
-                                    ),
-                                    border = BorderStroke(1.dp, if (selectedCategory == cat) LuxuryGold else Color.White.copy(alpha = 0.2f))
-                                )
+                    if (partialText.isNotBlank()) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Surface(shape = RoundedCornerShape(8.dp), color = CardElev, border = BorderStroke(0.5.dp, Border)) {
+                            Text(partialText, fontSize = 11.sp, color = Color.White, modifier = Modifier.padding(10.dp))
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.fillMaxWidth()) {
+                        items(categories.size) { idx ->
+                            val cat = categories[idx]
+                            val isSelected = selectedCategory == cat
+                            if (isSelected) {
+                                Box(modifier = Modifier.clip(RoundedCornerShape(10.dp)).background(GoldBrush).clickable { selectedCategory = cat }.padding(horizontal = 14.dp, vertical = 7.dp)) {
+                                    Text(cat, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Bg)
+                                }
+                            } else {
+                                Surface(shape = RoundedCornerShape(10.dp), color = CardElev, border = BorderStroke(0.5.dp, Border), modifier = Modifier.clickable { selectedCategory = cat }) {
+                                    Text(cat, fontSize = 11.sp, color = Color.White.copy(alpha = 0.7f), modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp))
+                                }
                             }
                         }
                     }
                 }
             }
 
-            // Messages
-            LazyColumn(state = listState, modifier = Modifier.weight(1f).fillMaxWidth(), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            // پیام‌ها - ارتباط آسان و منظم
+            LazyColumn(state = listState, modifier = Modifier.weight(1f).fillMaxWidth(), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
                 items(messages, key = { it.id }) { message ->
-                    LuxuryChatBubble(message = message, isSpeaking = isSpeaking, onSpeakClick = { viewModel.speakPersianText(message.content) }, onStopClick = { viewModel.stopSpeaking() }, onDeleteClick = { viewModel.deleteChatMessage(message.id) })
+                    LuxuryChatBubbleGreen(
+                        message = message,
+                        isSpeaking = isSpeaking,
+                        onSpeakClick = { viewModel.speakPersianText(message.content) },
+                        onStopClick = { viewModel.stopSpeaking() },
+                        onDeleteClick = { viewModel.deleteChatMessage(message.id) }
+                    )
                 }
-                if (isThinking) { item { AiThinkingBubble(isOffline = isOfflineMode) } }
+                if (isThinking) {
+                    item { AiThinkingBubbleGreen(isOffline = isOfflineMode) }
+                }
+                item { Spacer(modifier = Modifier.height(8.dp)) }
             }
 
-            // Input - بخش ۱ و ۱۳ Haptic
-            Card(modifier = Modifier.fillMaxWidth().shadow(16.dp, RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)), shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp), colors = CardDefaults.cardColors(containerColor = Color.White), elevation = CardDefaults.cardElevation(12.dp)) {
+            // ورودی - لاکچری و خلاقانه - ارتباط راحت
+            Card(
+                modifier = Modifier.fillMaxWidth().shadow(16.dp, RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)),
+                shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+                colors = CardDefaults.cardColors(containerColor = CardBg),
+                border = BorderStroke(1.dp, BorderStrong)
+            ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        val suggestions = listOf("مهلت تجدیدنظر؟", "چک برگشتی", "مهریه", "پیش‌بینی رای")
-                        suggestions.forEach { sug ->
-                            Surface(shape = RoundedCornerShape(12.dp), color = Slate100, border = BorderStroke(1.dp, Slate200)) {
-                                Text(sug, fontSize = 10.sp, color = Slate700, modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp).clickable { inputText = sug })
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.fillMaxWidth()) {
+                        items(suggestions.size) { idx ->
+                            val sug = suggestions[idx]
+                            Surface(shape = RoundedCornerShape(12.dp), color = CardElev, border = BorderStroke(0.5.dp, Border), modifier = Modifier.clickable { inputText = sug }) {
+                                Text(sug, fontSize = 10.sp, color = Color.White.copy(alpha = 0.8f), modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp))
                             }
                         }
                     }
@@ -208,56 +227,71 @@ fun AiAssistantScreen(
                         OutlinedTextField(
                             value = inputText,
                             onValueChange = { inputText = it },
-                            placeholder = { Text(if (isOfflineMode) "سوال آفلاین با Gemma 2B فارسی..." else "سوال حقوقی فارسی + صحبت صوتی 🎙️", fontSize = 12.sp) },
-                            modifier = Modifier.weight(1f).testTag("ai_input"),
+                            placeholder = { Text(if (isOfflineMode) "سوال آفلاین با Gemma 2B..." else "سوال حقوقی فارسی + صحبت صوتی 🎙️", fontSize = 11.sp, color = Color.White.copy(alpha = 0.4f)) },
+                            modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(18.dp),
                             minLines = 1,
                             maxLines = 4,
-                            colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = Indigo600, unfocusedBorderColor = Slate200, focusedContainerColor = Slate50, unfocusedContainerColor = Slate50)
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = Gold,
+                                unfocusedBorderColor = Border,
+                                focusedContainerColor = CardElev,
+                                unfocusedContainerColor = CardElev,
+                                focusedTextColor = Color.White,
+                                unfocusedTextColor = Color.White,
+                                cursorColor = Gold
+                            )
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        // Mic Button - بخش ۱
-                        Box(modifier = Modifier.size(48.dp).clip(CircleShape).background(if (isListening) Rose500 else Slate200).clickable {
-                            if (isListening) { voiceManager.stopListening(); isListening = false } else {
-                                isListening = true
-                                voiceManager.startListeningPersian { text -> inputText = text; isListening = false }
-                            }
-                        }, contentAlignment = Alignment.Center) {
-                            Icon(if (isListening) Icons.Default.Stop else Icons.Default.Mic, contentDescription = "میکروفن", tint = if (isListening) Color.White else Slate600, modifier = Modifier.size(20.dp))
-                        }
-                        Spacer(modifier = Modifier.width(6.dp))
-                        // Send - بخش ۱۳ Haptic
-                        Box(modifier = Modifier.size(52.dp).clip(CircleShape).background(if (inputText.isBlank()) Slate300 else Indigo600).shadow(8.dp, CircleShape).clip(CircleShape).clickable(enabled = inputText.isNotBlank() && !isThinking) {
-                            if (inputText.isNotBlank()) {
-                                if (isOfflineMode) {
-                                    // آفلاین
-                                    scope.launch {
-                                        val result = offlineService.askOffline(inputText)
-                                        result.onSuccess { answer ->
-                                            viewModel.sendAiMessage("آفلاین: $inputText\nپاسخ: $answer")
-                                        }
-                                    }
-                                } else {
-                                    viewModel.sendAiMessage(inputText)
+                        // Mic لاکچری
+                        Box(
+                            modifier = Modifier.size(48.dp).clip(CircleShape).background(if (isListening) Gold else CardElev).shadow(0.dp).clickable {
+                                if (isListening) { voiceManager.stopListening(); isListening = false }
+                                else {
+                                    isListening = true
+                                    voiceManager.startListeningPersian { text -> inputText = text; isListening = false }
                                 }
-                                inputText = ""
-                            }
-                        }, contentAlignment = Alignment.Center) {
-                            if (isThinking) CircularProgressIndicator(modifier = Modifier.size(20.dp), color = Color.White, strokeWidth = 2.dp)
-                            else Icon(Icons.Default.Send, contentDescription = "ارسال", tint = Color.White, modifier = Modifier.size(22.dp))
+                            }.then(if (!isListening) Modifier.background(CardElev) else Modifier),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(if (isListening) Icons.Default.Stop else Icons.Default.Mic, contentDescription = null, tint = if (isListening) Bg else Gold, modifier = Modifier.size(20.dp))
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        // Send طلایی لاکچری
+                        Box(
+                            modifier = Modifier.size(52.dp).clip(CircleShape).background(if (inputText.isBlank()) CardElev2 else GoldBrush).shadow(8.dp, CircleShape).clip(CircleShape).clickable(enabled = inputText.isNotBlank() && !isThinking) {
+                                if (inputText.isNotBlank()) {
+                                    if (isOfflineMode) {
+                                        scope.launch {
+                                            val result = offlineService.askOffline(inputText)
+                                            result.onSuccess { answer -> viewModel.sendAiMessage("آفلاین: $inputText\nپاسخ: $answer") }
+                                        }
+                                    } else {
+                                        viewModel.sendAiMessage(inputText)
+                                    }
+                                    inputText = ""
+                                }
+                            },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (isThinking) CircularProgressIndicator(modifier = Modifier.size(20.dp), color = Bg, strokeWidth = 2.dp)
+                            else Icon(Icons.Default.Send, contentDescription = null, tint = if (inputText.isBlank()) Color.White.copy(alpha = 0.3f) else Bg, modifier = Modifier.size(22.dp))
                         }
                     }
-                    Row(modifier = Modifier.fillMaxWidth().padding(top = 10.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.RecordVoiceOver, contentDescription = null, tint = if (isSpeaking) Emerald600 else Slate400, modifier = Modifier.size(16.dp))
+                            Icon(Icons.Default.RecordVoiceOver, contentDescription = null, tint = if (isSpeaking) Gold else Color.White.copy(alpha = 0.3f), modifier = Modifier.size(14.dp))
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text(if (isSpeaking) "🔊 در حال خواندن با صدای ${selectedVoiceProfile.name}..." else "STT فارسی • TTS فارسی • آفلاین • ۵ صدا", fontSize = 10.sp, color = if (isSpeaking) Emerald600 else Slate500)
+                            Text(if (isSpeaking) "🔊 در حال خواندن با صدای ${selectedVoiceProfile.name}..." else "STT فارسی • TTS فارسی • آفلاین • ۵ صدای وکیل لاکچری", fontSize = 9.sp, color = if (isSpeaking) GoldLight else Color.White.copy(alpha = 0.4f))
                         }
                         if (isSpeaking) {
-                            FilledTonalButton(onClick = { viewModel.stopSpeaking() }, shape = RoundedCornerShape(10.dp), colors = ButtonDefaults.filledTonalButtonColors(containerColor = Rose50, contentColor = Rose600), contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp), modifier = Modifier.height(32.dp)) {
-                                Icon(Icons.Default.Stop, contentDescription = null, modifier = Modifier.size(14.dp))
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text("توقف", fontSize = 11.sp)
+                            Surface(shape = RoundedCornerShape(10.dp), color = Gold.copy(alpha = 0.15f), border = BorderStroke(0.5.dp, Gold.copy(alpha = 0.3f)), modifier = Modifier.clickable { viewModel.stopSpeaking() }) {
+                                Row(modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+                                    Icon(Icons.Default.Stop, contentDescription = null, tint = Gold, modifier = Modifier.size(12.dp))
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text("توقف", fontSize = 10.sp, color = Gold, fontWeight = FontWeight.Bold)
+                                }
                             }
                         }
                     }
@@ -268,50 +302,54 @@ fun AiAssistantScreen(
 }
 
 @Composable
-fun LuxuryChatBubble(message: AiChatMessage, isSpeaking: Boolean, onSpeakClick: () -> Unit, onStopClick: () -> Unit, onDeleteClick: () -> Unit) {
+fun LuxuryChatBubbleGreen(message: AiChatMessage, isSpeaking: Boolean, onSpeakClick: () -> Unit, onStopClick: () -> Unit, onDeleteClick: () -> Unit) {
     val isUser = message.role == "user"
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start) {
         if (!isUser) {
-            Box(modifier = Modifier.size(36.dp).clip(CircleShape).background(LuxuryGoldBrush), contentAlignment = Alignment.Center) {
-                Icon(Icons.Default.SmartToy, contentDescription = null, tint = LuxuryNavy, modifier = Modifier.size(20.dp))
+            Box(modifier = Modifier.size(36.dp).clip(CircleShape).background(GoldBrush), contentAlignment = Alignment.Center) {
+                Icon(Icons.Default.SmartToy, contentDescription = null, tint = Bg, modifier = Modifier.size(20.dp))
             }
             Spacer(modifier = Modifier.width(8.dp))
         }
         Card(
             modifier = Modifier.widthIn(max = 300.dp).shadow(6.dp, RoundedCornerShape(18.dp)),
             shape = RoundedCornerShape(topStart = if (isUser) 18.dp else 4.dp, topEnd = if (isUser) 4.dp else 18.dp, bottomStart = 18.dp, bottomEnd = 18.dp),
-            colors = CardDefaults.cardColors(containerColor = if (isUser) Indigo600 else Color.White),
-            border = if (!isUser) BorderStroke(1.dp, Slate200) else null,
+            colors = CardDefaults.cardColors(containerColor = if (isUser) Gold else CardBg),
+            border = BorderStroke(0.5.dp, if (isUser) GoldLight else Border),
             elevation = CardDefaults.cardElevation(2.dp)
         ) {
             Column(modifier = Modifier.padding(14.dp)) {
                 if (!isUser && message.legalCategory.isNotBlank()) {
-                    Surface(shape = RoundedCornerShape(6.dp), color = Indigo50, border = BorderStroke(0.5.dp, Indigo200)) {
-                        Text(message.legalCategory, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Indigo700, modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp))
+                    Surface(shape = RoundedCornerShape(6.dp), color = CardElev, border = BorderStroke(0.5.dp, Border)) {
+                        Text(message.legalCategory, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = Gold, modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp))
                     }
                     Spacer(modifier = Modifier.height(6.dp))
                 }
-                Text(message.content, fontSize = 13.sp, lineHeight = 19.sp, color = if (isUser) Color.White else Slate800)
+                Text(message.content, fontSize = 13.sp, lineHeight = 19.sp, color = if (isUser) Bg else Color.White)
                 if (!isUser && message.relatedLawArticles.isNotBlank()) {
                     Spacer(modifier = Modifier.height(8.dp))
-                    Surface(shape = RoundedCornerShape(8.dp), color = Amber50, border = BorderStroke(0.5.dp, Amber100)) {
+                    Surface(shape = RoundedCornerShape(8.dp), color = CardElev, border = BorderStroke(0.5.dp, Border)) {
                         Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.Gavel, contentDescription = null, tint = Amber600, modifier = Modifier.size(14.dp))
+                            Icon(Icons.Default.Gavel, contentDescription = null, tint = Gold, modifier = Modifier.size(14.dp))
                             Spacer(modifier = Modifier.width(4.dp))
-                            Text(message.relatedLawArticles, fontSize = 10.sp, color = Amber600, fontWeight = FontWeight.Medium)
+                            Text(message.relatedLawArticles, fontSize = 10.sp, color = GoldLight, fontWeight = FontWeight.Medium)
                         }
                     }
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    Text(formatTimestamp(message.timestamp), fontSize = 10.sp, color = if (isUser) Color.White.copy(alpha = 0.7f) else Slate400)
+                    Text(formatTimestampGreen(message.timestamp), fontSize = 9.sp, color = if (isUser) Bg.copy(alpha = 0.7f) else Color.White.copy(alpha = 0.4f))
                     if (!isUser) {
                         Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                            IconButton(onClick = { if (isSpeaking) onStopClick() else onSpeakClick() }, modifier = Modifier.size(28.dp)) {
-                                Icon(if (isSpeaking) Icons.Default.Stop else Icons.Default.VolumeUp, contentDescription = "خواندن", tint = if (isSpeaking) Rose500 else Indigo600, modifier = Modifier.size(16.dp))
+                            Surface(shape = CircleShape, color = CardElev, border = BorderStroke(0.5.dp, Border), modifier = Modifier.size(28.dp).clickable { if (isSpeaking) onStopClick() else onSpeakClick() }) {
+                                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                                    Icon(if (isSpeaking) Icons.Default.Stop else Icons.Default.VolumeUp, contentDescription = null, tint = if (isSpeaking) Color(0xFFF87171) else Gold, modifier = Modifier.size(16.dp))
+                                }
                             }
-                            IconButton(onClick = onDeleteClick, modifier = Modifier.size(28.dp)) {
-                                Icon(Icons.Default.DeleteOutline, contentDescription = "حذف", tint = Slate400, modifier = Modifier.size(16.dp))
+                            Surface(shape = CircleShape, color = CardElev, border = BorderStroke(0.5.dp, Border), modifier = Modifier.size(28.dp).clickable { onDeleteClick() }) {
+                                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                                    Icon(Icons.Default.DeleteOutline, contentDescription = null, tint = Color.White.copy(alpha = 0.4f), modifier = Modifier.size(16.dp))
+                                }
                             }
                         }
                     }
@@ -320,31 +358,31 @@ fun LuxuryChatBubble(message: AiChatMessage, isSpeaking: Boolean, onSpeakClick: 
         }
         if (isUser) {
             Spacer(modifier = Modifier.width(8.dp))
-            Box(modifier = Modifier.size(36.dp).clip(CircleShape).background(Brush.linearGradient(listOf(Indigo600, Indigo800))), contentAlignment = Alignment.Center) {
-                Icon(Icons.Default.Person, contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
+            Box(modifier = Modifier.size(36.dp).clip(CircleShape).background(GoldBrush), contentAlignment = Alignment.Center) {
+                Icon(Icons.Default.Person, contentDescription = null, tint = Bg, modifier = Modifier.size(20.dp))
             }
         }
     }
 }
 
 @Composable
-fun AiThinkingBubble(isOffline: Boolean = false) {
+fun AiThinkingBubbleGreen(isOffline: Boolean = false) {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
-        Box(modifier = Modifier.size(36.dp).clip(CircleShape).background(if (isOffline) Brush.linearGradient(listOf(Amber500, Amber600)) else LuxuryGoldBrush), contentAlignment = Alignment.Center) {
-            Icon(if (isOffline) Icons.Default.CloudOff else Icons.Default.SmartToy, contentDescription = null, tint = if (isOffline) Color.White else LuxuryNavy, modifier = Modifier.size(20.dp))
+        Box(modifier = Modifier.size(36.dp).clip(CircleShape).background(GoldBrush), contentAlignment = Alignment.Center) {
+            Icon(if (isOffline) Icons.Default.CloudOff else Icons.Default.SmartToy, contentDescription = null, tint = Bg, modifier = Modifier.size(20.dp))
         }
         Spacer(modifier = Modifier.width(8.dp))
-        Card(shape = RoundedCornerShape(18.dp, 18.dp, 18.dp, 4.dp), colors = CardDefaults.cardColors(containerColor = Color.White), border = BorderStroke(1.dp, Slate200), elevation = CardDefaults.cardElevation(2.dp)) {
+        Card(shape = RoundedCornerShape(18.dp, 18.dp, 18.dp, 4.dp), colors = CardDefaults.cardColors(containerColor = CardBg), border = BorderStroke(1.dp, Border), elevation = CardDefaults.cardElevation(2.dp)) {
             Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp, color = Indigo600)
+                CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp, color = Gold)
                 Spacer(modifier = Modifier.width(10.dp))
-                Text(if (isOffline) "مدل آفلاین Gemma 2B در حال تحلیل..." else "در حال تحلیل بر اساس قوانین رسمی ایران...", fontSize = 12.sp, color = Slate600, fontWeight = FontWeight.Medium)
+                Text(if (isOffline) "مدل آفلاین Gemma 2B در حال تحلیل..." else "در حال تحلیل بر اساس قوانین رسمی ایران...", fontSize = 11.sp, color = Color.White.copy(alpha = 0.7f), fontWeight = FontWeight.Medium)
             }
         }
     }
 }
 
-fun formatTimestamp(timestamp: Long): String {
+fun formatTimestampGreen(timestamp: Long): String {
     val now = System.currentTimeMillis()
     val diff = now - timestamp
     return when {
