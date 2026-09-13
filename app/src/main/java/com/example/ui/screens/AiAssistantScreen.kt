@@ -251,7 +251,7 @@ fun AiAssistantScreen(
                                     isListening = true
                                     voiceManager.startListeningPersian { text -> inputText = text; isListening = false }
                                 }
-                            }.then(if (!isListening) Modifier.background(CardElev) else Modifier),
+                            },
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(if (isListening) Icons.Default.Stop else Icons.Default.Mic, contentDescription = null, tint = if (isListening) Bg else Gold, modifier = Modifier.size(20.dp))
@@ -259,7 +259,7 @@ fun AiAssistantScreen(
                         Spacer(modifier = Modifier.width(8.dp))
                         // Send طلایی لاکچری
                         Box(
-                            modifier = Modifier.size(52.dp).clip(CircleShape).background(if (inputText.isBlank()) CardElev2 else GoldBrush).shadow(8.dp, CircleShape).clip(CircleShape).clickable(enabled = inputText.isNotBlank() && !isThinking) {
+                            modifier = Modifier.size(52.dp).clip(CircleShape).background(if (inputText.isBlank()) CardElev2 else Gold).shadow(8.dp, CircleShape).clip(CircleShape).clickable(enabled = inputText.isNotBlank() && !isThinking) {
                                 if (inputText.isNotBlank()) {
                                     if (isOfflineMode) {
                                         scope.launch {

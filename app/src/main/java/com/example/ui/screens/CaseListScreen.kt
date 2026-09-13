@@ -359,7 +359,7 @@ private fun UniformCaseCard(legalCase: LegalCase, onClick: () -> Unit, onDelete:
                         Icon(Icons.Default.DeleteOutline, contentDescription = null, tint = Color.White.copy(alpha = 0.4f), modifier = Modifier.size(24.dp).padding(6.dp).clickable { onDelete() })
                     }
                 }
-                Text("${java.text.SimpleDateFormat(\"yyyy/MM/dd\", java.util.Locale.getDefault()).format(java.util.Date(legalCase.createdAt))}", fontSize = 9.sp, color = Color.White.copy(alpha = 0.3f))
+                Text(text = java.text.SimpleDateFormat("yyyy/MM/dd", java.util.Locale.getDefault()).format(java.util.Date(legalCase.createdAt)), fontSize = 9.sp, color = Color.White.copy(alpha = 0.3f))
             }
         }
     }
